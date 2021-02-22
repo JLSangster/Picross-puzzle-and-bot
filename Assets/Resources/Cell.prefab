@@ -101,7 +101,7 @@ MonoBehaviour:
   filledSprite: {fileID: 21300000, guid: 9e8931555cd981e4f8048cd5ebce60bd, type: 3}
   markedSprite: {fileID: 21300000, guid: 770af5c81cac69b468d9c6fdbc177224, type: 3}
   wrongSprite: {fileID: 21300000, guid: 6a6036e7e58111e4ca68785073a5b2fe, type: 3}
-  fillToggle: {fileID: 9087840988040206427, guid: be69114ab6cb845448fad709f1ebebd1, type: 3}
+  grid: {fileID: 2883754686755229201, guid: a726463721c26304c9f862455cbf28bf, type: 3}
 --- !u!61 &3210404194773538514
 BoxCollider2D:
   m_ObjectHideFlags: 0
