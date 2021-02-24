@@ -9,10 +9,12 @@ public class CellBehaviour : MonoBehaviour
     public bool correct;
     //vars for sprite changing
     public SpriteRenderer spriteRenderer;
+    public Sprite emptySprite;
     public Sprite filledSprite;
     public Sprite markedSprite;
     public Sprite wrongSprite;
     public GridManager gridManager;
+    private bool marked;
 
     // Start is called before the first frame update
     void Start()
@@ -32,14 +34,24 @@ public class CellBehaviour : MonoBehaviour
         gridManager.GetFill();
         if (gridManager.GetFill())
         {
-            Debug.Log("Fill true");
-            if (correct) { spriteRenderer.sprite = filledSprite; } //This function should also be do soemthing to indicate to the wider grid that the thing is correct so it could check if the puzzle is complete.
-            else { spriteRenderer.sprite = wrongSprite; }
+            if (!marked)
+            {
+                if (correct) { spriteRenderer.sprite = filledSprite; } //This function should also be do soemthing to indicate to the wider grid that the thing is correct so it could check if the puzzle is complete.
+                else { spriteRenderer.sprite = wrongSprite; }
+            }
         }
         else 
         {
-            Debug.Log("Fill false");
-            spriteRenderer.sprite = markedSprite;
+            if (!marked)
+            {
+                spriteRenderer.sprite = markedSprite;
+                marked = true;
+            }
+            else
+            {
+                spriteRenderer.sprite = emptySprite;
+                marked = false;
+            }
         }
     }   
 }

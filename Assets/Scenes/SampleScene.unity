@@ -403,6 +403,10 @@ PrefabInstance:
       propertyPath: fillTog
       value: 
       objectReference: {fileID: 91636664}
+    - target: {fileID: 2883754686755229200, guid: a726463721c26304c9f862455cbf28bf, type: 3}
+      propertyPath: fillToggle
+      value: 
+      objectReference: {fileID: 91636664}
     - target: {fileID: 2883754686755229201, guid: a726463721c26304c9f862455cbf28bf, type: 3}
       propertyPath: m_Name
       value: Grid
@@ -545,14 +549,6 @@ PrefabInstance:
       value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 9087840988040206427, guid: be69114ab6cb845448fad709f1ebebd1, type: 3}
-      propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 9087840988040206427, guid: be69114ab6cb845448fad709f1ebebd1, type: 3}
-      propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 9087840988040206427, guid: be69114ab6cb845448fad709f1ebebd1, type: 3}
       propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.data[1].m_TargetAssemblyTypeName
       value: TestScript, Assembly-CSharp
       objectReference: {fileID: 0}
@@ -580,14 +576,6 @@ PrefabInstance:
       propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 322747957}
-    - target: {fileID: 9087840988040206427, guid: be69114ab6cb845448fad709f1ebebd1, type: 3}
-      propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: TogClick
-      objectReference: {fileID: 0}
-    - target: {fileID: 9087840988040206427, guid: be69114ab6cb845448fad709f1ebebd1, type: 3}
-      propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: TestScript, Assembly-CSharp
-      objectReference: {fileID: 0}
     - target: {fileID: 9087840988040206429, guid: be69114ab6cb845448fad709f1ebebd1, type: 3}
       propertyPath: m_Name
       value: FillToggle
