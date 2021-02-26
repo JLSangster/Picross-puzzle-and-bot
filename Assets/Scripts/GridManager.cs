@@ -11,24 +11,30 @@ public class GridManager : MonoBehaviour
     private bool[] corrects = { true, true, true, true, true, false, true, true, true, false, false, false, true, false, false, false, true, true, true, false, true, true, true, true, true };
     public GameObject fillToggle;
     private bool fill;
+    //flag for if puzzle is complete, might need to be changed to public, haven't decided what happens when its done yet.
+    private bool complete;
+    //int counting the current correct cell number
+    private int correctCount;
+    //dummy var, gets changed once i've figured out how to do the actual puzzle bit
+    private int completeCount;
 
     // Start is called before the first frame update
     void Start()
     {
         fill = (fillToggle.GetComponent<Toggle>().isOn);
+        completeCount = 17;
+        correctCount = 0;
         GenGrid();
-        GetFill();
     }
 
     // Update is called once per frame
     void Update()
     {
-      
+        
     }
 
     public bool GetFill()
     {
-        Debug.Log(fill);
         return (fill);
     }
 
@@ -36,6 +42,21 @@ public class GridManager : MonoBehaviour
     public void TogClick(bool tog)
     {
         fill = tog;
+    }
+
+    public void AddCorrectCell()
+    {
+        correctCount += 1;
+        Debug.Log(correctCount);
+        //check if that makes it the same as the complete count
+        if (correctCount == completeCount) { PuzzleComplete(); }
+    }
+
+    //Might not stay public
+    public void PuzzleComplete()
+    {
+        Debug.Log("Puzzle complete!");
+        //Do Something once the puzzle is complete.
     }
 
     //Generate the grid of given dimensions
@@ -67,5 +88,6 @@ public class GridManager : MonoBehaviour
 
         Destroy(cellRef);
     }
+
 }
 

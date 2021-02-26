@@ -15,6 +15,7 @@ public class CellBehaviour : MonoBehaviour
     public Sprite wrongSprite;
     public GridManager gridManager;
     private bool marked;
+    //some variable to indicate that the cell has been correctly marked
 
     // Start is called before the first frame update
     void Start()
@@ -36,7 +37,12 @@ public class CellBehaviour : MonoBehaviour
         {
             if (!marked)
             {
-                if (correct) { spriteRenderer.sprite = filledSprite; } //This function should also be do soemthing to indicate to the wider grid that the thing is correct so it could check if the puzzle is complete.
+                if (correct) 
+                {
+                    spriteRenderer.sprite = filledSprite;
+                    gridManager.AddCorrectCell();
+
+                } //This function should also be do soemthing to indicate to the wider grid that the thing is correct so it could check if the puzzle is complete.
                 else { spriteRenderer.sprite = wrongSprite; }
             }
         }
@@ -53,5 +59,5 @@ public class CellBehaviour : MonoBehaviour
                 marked = false;
             }
         }
-    }   
+    }
 }
