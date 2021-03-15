@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class GridManager : MonoBehaviour
 {
     private int rows = 5;
     private int cols = 5;
-    private float tileSize = 1;
+    private float tileSize = 32;
     public GameObject fillToggle;
     private bool fill;
     //flag for if puzzle is complete, might need to be changed to public, haven't decided what happens when its done yet.
@@ -65,23 +66,23 @@ public class GridManager : MonoBehaviour
     void GenGrid()
     {
         GameObject cellRef = (GameObject)Instantiate(Resources.Load("Cell")); 
-        GameObject labelRef = (GameObject)Instantiate(Resources.Load("RowLabel"));
-        //this will be replaced at some point with loading in the list from elsewhere probably.
-
-        //GameObject label = (GameObject)Instantiate(labelRef, transform);
+        GameObject rowLabelRef = (GameObject)Instantiate(Resources.Load("RowLabel"));
+        GameObject colLabelRef = (GameObject)Instantiate(Resources.Load("ColLabel"));
+        Debug.Log("refs loaded");
 
         for (int r = 0; r < rows; r++)
         {
-            //print clue first
-            GameObject label = (GameObject)Instantiate(labelRef, transform);
-            label.GetComponent<UnityEngine.UI.Text>().text = clues[r, 0].ToString();
+            //print row label first
+            GameObject rowLabel = (GameObject)Instantiate(rowLabelRef, transform);
+            rowLabel.GetComponent<TextMeshProUGUI>().text = clues[r, 0].ToString();
 
             float posX, posY;
-            posX = (-cols / 2 - 1) * tileSize;
-            posY = (r * tileSize) - (rows / 2 * tileSize);
+            //This maths needs simplifying
+            posX = (0 * tileSize) - (cols/2 * tileSize) - 16;
+            posY = ((r * tileSize) - (rows/2 * tileSize) + tileSize);
 
-            label.transform.position = new Vector2(posX, posY);
-            
+            rowLabel.transform.localPosition = new Vector3(posX, posY, 0);
+
             for (int c = 0; c < cols; c++)
             {
                 GameObject cell = (GameObject)Instantiate(cellRef, transform);
@@ -89,22 +90,35 @@ public class GridManager : MonoBehaviour
                 cellBehaviour.correct = solMat[r,c];
                 cellBehaviour.gridManager = this;
 
-                //float posX, posY;
-                posX = (c * tileSize) - (cols/2 * tileSize);
-                posY = (r * tileSize) - (rows/2 * tileSize);
+                posX = (c * 1) - (cols/2 * 1);
+                posY = (r * 1) - (rows/2 * 1);
 
-                cell.transform.position = new Vector2(posX, posY);
+                cell.transform.position = new Vector3(posX, posY, 0);
             }
         }
 
+        for (int c = 0; c < cols; c++)
+        {
+            GameObject colLabel = (GameObject)Instantiate(colLabelRef, transform);
+            colLabel.GetComponent<TextMeshProUGUI>().text = clues[c, 1].ToString();
+
+            float posX, posY;
+            //This maths needs simplifying - i need some means to know what the size of the textmesh is.
+            posX = (c * tileSize) - (cols / 2 * tileSize) + 16;
+            posY = ((0 * tileSize) + (rows / 2 * tileSize));// - colLabel.);
+
+            colLabel.transform.localPosition = new Vector3(posX, posY, 0);
+        }
+
         Destroy(cellRef);
-        Destroy(labelRef);
+        Destroy(rowLabelRef);
+        Destroy(colLabelRef);
     }
 
     void GenPuzzle()
     {
         //randomize the rows
-        rows = 5 * Random.Range(1, 3);
+        rows =  5 * Random.Range(1, 2);
         cols = rows;
 
         //init the mat
@@ -130,6 +144,7 @@ public class GridManager : MonoBehaviour
             clues[r, 0] = "";
             for (int c = 0; c < cols; c++)
             {
+                Debug.Log(r + ", " + c);
                 if (solMat[r, c] == true) { clueCounter += 1; }
                 else
                 {
@@ -147,8 +162,9 @@ public class GridManager : MonoBehaviour
         {
             int clueCounter = 0;
             clues[c, 1] = "";
-            for (int r = 0; r < rows; r++)
+            for (int r = (rows - 1); r >= 0; r--)
             {
+                Debug.Log(r + ", " +  c);
                 if (solMat[r, c] == true) { clueCounter += 1; }
                 else
                 {
@@ -159,7 +175,7 @@ public class GridManager : MonoBehaviour
                     }
                 }
             }
-            if (clues[c, 1] != "" || clueCounter != 0) { clues[c, 1] = clues[c, 1] + clueCounter.ToString(); }
+            if (clues[c, 1] == "" || clueCounter != 0) { clues[c, 1] = clues[c, 1] + clueCounter.ToString(); }
         }
     }
 

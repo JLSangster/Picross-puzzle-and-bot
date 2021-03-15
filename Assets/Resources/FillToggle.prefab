@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 9087840987590390999}
   - component: {fileID: 9087840987590390997}
   - component: {fileID: 9087840987590390996}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -86,7 +86,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9087840988040206426}
   - component: {fileID: 9087840988040206427}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: FillToggle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -159,9 +159,9 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 11500000, guid: ebcbff9dafbc4c44eb579ef4b7993e84, type: 3}
         m_TargetAssemblyTypeName: TestScript, Assembly-CSharp
-        m_MethodName: TogClick
+        m_MethodName: 
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -183,7 +183,7 @@ GameObject:
   - component: {fileID: 9087840989281278854}
   - component: {fileID: 9087840989281278852}
   - component: {fileID: 9087840989281278855}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Checkmark
   m_TagString: Untagged
   m_Icon: {fileID: 0}
