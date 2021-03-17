@@ -77,9 +77,11 @@ public class GridManager : MonoBehaviour
             rowLabel.GetComponent<TextMeshProUGUI>().text = clues[r, 0].ToString();
 
             float posX, posY;
-            //This maths needs simplifying
-            posX = (0 * tileSize) - (cols/2 * tileSize) - 16;
-            posY = ((r * tileSize) - (rows/2 * tileSize) + tileSize);
+            //mathematically simplified equations - not neccesarily computationally more efficient
+            //posX = (0 * tileSize) - (cols/2 * tileSize) - 16;
+            posX = -(((cols * tileSize) + tileSize) / 2);
+            //posY = ((r * tileSize) - (rows/2 * tileSize) + tileSize);
+            posY = tileSize * (r - (rows / 2) + 1);
 
             rowLabel.transform.localPosition = new Vector3(posX, posY, 0);
 
@@ -103,9 +105,11 @@ public class GridManager : MonoBehaviour
             colLabel.GetComponent<TextMeshProUGUI>().text = clues[c, 1].ToString();
 
             float posX, posY;
-            //This maths needs simplifying - i need some means to know what the size of the textmesh is.
-            posX = (c * tileSize) - (cols / 2 * tileSize) + 16;
-            posY = ((0 * tileSize) + (rows / 2 * tileSize));// - colLabel.);
+            //again with the simpliefied equations being used. This positioning could be improved here, QoL ideally the text is displayed from the bottom up
+            //posX = (c * tileSize) - (cols / 2 * tileSize);
+            posX = tileSize * (c - (cols / 2));
+            //posY = ((0 * tileSize) + (rows / 2 * tileSize)) - 16;
+            posY = tileSize * ((rows - 1)/ 2);
 
             colLabel.transform.localPosition = new Vector3(posX, posY, 0);
         }
@@ -117,7 +121,7 @@ public class GridManager : MonoBehaviour
 
     void GenPuzzle()
     {
-        //randomize the rows
+        //randomize the size of the puzzle
         rows =  5 * Random.Range(1, 2);
         cols = rows;
 
