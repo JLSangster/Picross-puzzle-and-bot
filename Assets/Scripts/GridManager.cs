@@ -20,21 +20,32 @@ public class GridManager : MonoBehaviour
     //solution matrix
     private bool[,] solMat;
     private string[,] clues;
+    public UIManager uIManager;
 
     // Start is called before the first frame update
     void Start()
     {
         fill = (fillToggle.GetComponent<Toggle>().isOn);
-        completeCount = 17;
+        completeCount = 0;
         correctCount = 0;
-        GenPuzzle();
-        GenGrid();
+        NewPuzzle();
     }
 
     // Update is called once per frame
     void Update()
     {
         
+    }
+
+    public void NewPuzzle()
+    {
+        //Destroying all children from the previous puzzle
+        foreach (Transform child in transform)
+        {
+            Destroy(child.gameObject);
+        }
+        GenPuzzle();
+        GenGrid();
     }
 
     public bool GetFill()
@@ -58,17 +69,16 @@ public class GridManager : MonoBehaviour
     //Might not stay public
     public void PuzzleComplete()
     {
-        Debug.Log("Puzzle complete!");
-        //Do Something once the puzzle is complete.
+        uIManager.setShowWin(true);
     }
 
     //Generate the grid of given dimensions
     void GenGrid()
     {
+        uIManager.setShowWin(false);
         GameObject cellRef = (GameObject)Instantiate(Resources.Load("Cell")); 
         GameObject rowLabelRef = (GameObject)Instantiate(Resources.Load("RowLabel"));
         GameObject colLabelRef = (GameObject)Instantiate(Resources.Load("ColLabel"));
-        Debug.Log("refs loaded");
 
         for (int r = 0; r < rows; r++)
         {
@@ -148,7 +158,6 @@ public class GridManager : MonoBehaviour
             clues[r, 0] = "";
             for (int c = 0; c < cols; c++)
             {
-                Debug.Log(r + ", " + c);
                 if (solMat[r, c] == true) { clueCounter += 1; }
                 else
                 {
@@ -168,7 +177,6 @@ public class GridManager : MonoBehaviour
             clues[c, 1] = "";
             for (int r = (rows - 1); r >= 0; r--)
             {
-                Debug.Log(r + ", " +  c);
                 if (solMat[r, c] == true) { clueCounter += 1; }
                 else
                 {
