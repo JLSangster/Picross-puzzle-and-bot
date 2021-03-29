@@ -15,12 +15,18 @@ public class GridManager : MonoBehaviour
     private bool complete;
     //int counting the current correct cell number
     private int correctCount;
-    //dummy var, gets changed once i've figured out how to do the actual puzzle bit
+    //
     private int completeCount;
     //solution matrix
     private bool[,] solMat;
     private string[,] clues;
     public UIManager uIManager;
+    public int wins = 0;
+    public float timer;
+    public Text timerRead;
+    private float timeTot;
+    public float timeAvg;
+    private bool timerActive;
 
     // Start is called before the first frame update
     void Start()
@@ -34,7 +40,11 @@ public class GridManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if (timerActive)
+        {
+            timer += Time.deltaTime;
+            timerRead.text = timer.ToString();
+        }
     }
 
     public void NewPuzzle()
@@ -69,7 +79,12 @@ public class GridManager : MonoBehaviour
     //Might not stay public
     public void PuzzleComplete()
     {
+        timerActive = false;
         uIManager.setShowWin(true);
+        wins += 1;
+        timeTot += timer;
+        //this should probably change to wins + fails once I decide on a fail perameter
+        timeAvg = timeTot / wins;               
     }
 
     //Generate the grid of given dimensions
@@ -127,10 +142,16 @@ public class GridManager : MonoBehaviour
         Destroy(cellRef);
         Destroy(rowLabelRef);
         Destroy(colLabelRef);
+
+        //reset the timer to zero.
+        timer = 0.0f;
+        timerActive = true;
     }
 
     void GenPuzzle()
     {
+        completeCount = 0;
+        correctCount = 0;
         //randomize the size of the puzzle
         rows =  5 * Random.Range(1, 2);
         cols = rows;
