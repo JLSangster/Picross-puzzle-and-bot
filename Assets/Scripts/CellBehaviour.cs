@@ -15,7 +15,8 @@ public class CellBehaviour : MonoBehaviour
     public Sprite wrongSprite;
     public GridManager gridManager;
 
-    private bool marked;
+    private bool marked = false;
+    private bool filled = false;
 
     // Start is called before the first frame update
     void Start()
@@ -32,31 +33,40 @@ public class CellBehaviour : MonoBehaviour
     //on click, depending on the correct thing for the cell the sprite should change.
     void OnMouseDown()
     {
-        gridManager.GetFill();
+        //if the fill toggle is set to fill cells
         if (gridManager.GetFill())
         {
+            //If the cell is not marked or already filled
             if (!marked)
             {
                 if (correct) 
                 {
+                    //Fill the cell and ammend the current correct cells
                     spriteRenderer.sprite = filledSprite;
+                    filled = true;
                     gridManager.AddCorrectCell();
 
                 }
+                //if the cell is incorrect
                 else { spriteRenderer.sprite = wrongSprite; }
             }
         }
+        //if it is set to mark (or cross) cells
         else 
         {
-            if (!marked)
+            if (!filled)
             {
-                spriteRenderer.sprite = markedSprite;
-                marked = true;
-            }
-            else
-            {
-                spriteRenderer.sprite = emptySprite;
-                marked = false;
+                //Toggle if the cell is marked
+                if (!marked)
+                {
+                    spriteRenderer.sprite = markedSprite;
+                    marked = true;
+                }
+                else
+                {
+                    spriteRenderer.sprite = emptySprite;
+                    marked = false;
+                }
             }
         }
     }
