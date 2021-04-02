@@ -48,7 +48,10 @@ public class CellBehaviour : MonoBehaviour
 
                 }
                 //if the cell is incorrect
-                else { spriteRenderer.sprite = wrongSprite; }
+                else {
+                    spriteRenderer.sprite = wrongSprite;
+                    gridManager.AddMistake();
+                }
             }
         }
         //if it is set to mark (or cross) cells

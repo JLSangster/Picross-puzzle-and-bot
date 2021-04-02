@@ -4,9 +4,10 @@ using UnityEngine;
 
 public class UIManager : MonoBehaviour
 {
-    private bool showMenuWin = false;
-    private bool showPuzWin = false;
-    private bool showFinWin = false;
+    public bool showMenu = false;
+    public bool showPuzWin = false;
+    public bool showFin = false;
+    public bool showPuzLoss = false;
     public int winWidth, winHeight;
     public GridManager gridManager;
 
@@ -24,17 +25,11 @@ public class UIManager : MonoBehaviour
         
     }
 
-    //Level transistion screen, grid manager passes a flag up to this
-    public void setShowWin(bool complete)
-    {
-        showPuzWin = complete;
-    }
-
     void OnGUI()
     {
         Rect winRect = new Rect((Screen.width - winWidth) / 2, (Screen.height - winHeight) / 2, winWidth, winHeight);
 
-        if (showMenuWin)
+        if (showMenu)
         { }
 
         if (showPuzWin)
@@ -51,13 +46,31 @@ public class UIManager : MonoBehaviour
             if (GUI.Button(new Rect(winRect.x + 20, winRect.y + winRect.height - 60, 150, 40), "Results"))
             {
                 showPuzWin = false;
-                showFinWin = true;
+                showFin = true;
             }
         }
 
-        if (showFinWin)
+        if (showPuzLoss)
         {
-            GUI.Box(winRect, "Results \n" + "Puzzles completed: " + gridManager.wins.ToString() + " \nAverage Time: " + gridManager.timeAvg, style);
+            GUI.Box(winRect, "Puzzle Failed.", style);
+
+
+            if (GUI.Button(new Rect(winRect.x + winRect.width - 170, winRect.y + winRect.height - 60, 150, 40), "Next Puzzle"))
+            {
+                showPuzLoss = false;
+                gridManager.NewPuzzle();
+            }
+
+            if (GUI.Button(new Rect(winRect.x + 20, winRect.y + winRect.height - 60, 150, 40), "Results"))
+            {
+                showPuzLoss = false;
+                showFin = true;
+            }
+        }
+
+        if (showFin)
+        {
+            GUI.Box(winRect, "Results \n" + "Puzzles completed: " + gridManager.wins.ToString() + "\nPuzzles failed: " + gridManager.losses.ToString() + " \nAverage Time: " + gridManager.timeAvg, style);
         }
     }
 }

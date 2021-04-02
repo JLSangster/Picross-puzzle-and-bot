@@ -15,18 +15,21 @@ public class GridManager : MonoBehaviour
     private bool complete;
     //int counting the current correct cell number
     private int correctCount;
-    //
     private int completeCount;
+    private int maxMistakes;
+    private int mistakes;
     //solution matrix
     private bool[,] solMat;
     private string[,] clues;
     public UIManager uIManager;
     public int wins = 0;
+    public int losses = 0;
     public float timer;
     public Text timerRead;
     private float timeTot;
     public float timeAvg;
     private bool timerActive;
+    private GameObject[] mistakeSprites;
 
     // Start is called before the first frame update
     void Start()
@@ -76,24 +79,40 @@ public class GridManager : MonoBehaviour
         if (correctCount == completeCount) { PuzzleComplete(); }
     }
 
+    public void AddMistake()
+    {
+        mistakes += 1;
+        Destroy(mistakeSprites[mistakes - 1]);
+        if (mistakes >= maxMistakes) { PuzzleLost(); }
+
+    }
+
     //Might not stay public
     public void PuzzleComplete()
     {
         timerActive = false;
-        uIManager.setShowWin(true);
+        uIManager.showPuzWin = true;
         wins += 1;
         timeTot += timer;
         //this should probably change to wins + fails once I decide on a fail perameter
         timeAvg = timeTot / wins;               
     }
 
+    public void PuzzleLost()
+    {
+        timerActive = false;
+        losses += 1;
+        uIManager.showPuzLoss = true;
+        //do nothing with the time for now    
+    }
+
     //Generate the grid of given dimensions
     void GenGrid()
     {
-        uIManager.setShowWin(false);
         GameObject cellRef = (GameObject)Instantiate(Resources.Load("Cell")); 
         GameObject rowLabelRef = (GameObject)Instantiate(Resources.Load("RowLabel"));
         GameObject colLabelRef = (GameObject)Instantiate(Resources.Load("ColLabel"));
+        GameObject mistakeRef = (GameObject)Instantiate(Resources.Load("MistakeMarker"));
 
         for (int r = 0; r < rows; r++)
         {
@@ -117,8 +136,8 @@ public class GridManager : MonoBehaviour
                 cellBehaviour.correct = solMat[r,c];
                 cellBehaviour.gridManager = this;
 
-                posX = (c * 1) - (cols/2 * 1);
-                posY = (r * 1) - (rows/2 * 1);
+                posX = c - (cols/2);
+                posY = r - (rows/2);
 
                 cell.transform.position = new Vector3(posX, posY, 0);
             }
@@ -139,9 +158,22 @@ public class GridManager : MonoBehaviour
             colLabel.transform.localPosition = new Vector3(posX, posY, 0);
         }
 
+        for (int i = 0; i < maxMistakes; i++)
+        {
+            GameObject mistakeMarker = (GameObject)Instantiate(mistakeRef, transform);
+            float posX, posY;
+
+            posX = cols;
+            posY = i + 1.3f;
+
+            mistakeMarker.transform.position = new Vector3(posX, posY, 0);
+            mistakeSprites[i] = mistakeMarker;
+        }
+
         Destroy(cellRef);
         Destroy(rowLabelRef);
         Destroy(colLabelRef);
+        Destroy(mistakeRef);
 
         //reset the timer to zero.
         timer = 0.0f;
@@ -152,9 +184,12 @@ public class GridManager : MonoBehaviour
     {
         completeCount = 0;
         correctCount = 0;
+        mistakes = 0;
         //randomize the size of the puzzle
         rows =  5 * Random.Range(1, 2);
         cols = rows;
+        maxMistakes = rows / 2;
+        mistakeSprites = new GameObject[maxMistakes];
 
         //init the mat
         solMat = new bool[rows, cols];
