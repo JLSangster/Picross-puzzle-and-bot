@@ -6,38 +6,43 @@ using TMPro;
 
 public class GridManager : MonoBehaviour
 {
-    private int rows = 5;
-    private int cols = 5;
-    private float tileSize = 32;
+    //Grid dimensions
+    private int rows;
+    private int cols;
+    private int clueNum;
+
+    public UIManager uIManager;
     public GameObject fillToggle;
     private bool fill;
-    //flag for if puzzle is complete, might need to be changed to public, haven't decided what happens when its done yet.
-    private bool complete;
-    //int counting the current correct cell number
-    private int correctCount;
-    private int completeCount;
-    private int maxMistakes;
-    private int mistakes;
-    //solution matrix
-    private bool[,] solMat;
+    public Text timerRead;
+
+    private bool complete; //flag for if puzzle is complete
+    private int correctCount; //int counting the current correct cell number
+    private int completeCount; //total number of correct cells for puzzle
+
+    private int maxMistakes; //max number of 'lives'
+    private int mistakes; //current mistakes made
+
+    private bool[,] solMat; //Solution matrix
     private string[,] clues;
-    public UIManager uIManager;
+    private int[,,] clueTileGrid;
+    private GameObject[] mistakeSprites; //Array for mistake markers
+
+    //results variables
     public int wins = 0;
     public int losses = 0;
     public float timer;
-    public Text timerRead;
-    private float timeTot;
     public float timeAvg;
+    public float attf;
+
+    //Timer vars
+    private float timeTot;
     private bool timerActive;
-    private GameObject[] mistakeSprites;
+    private float lossTot;
 
     // Start is called before the first frame update
     void Start()
     {
-        fill = (fillToggle.GetComponent<Toggle>().isOn);
-        completeCount = 0;
-        correctCount = 0;
-        NewPuzzle();
     }
 
     // Update is called once per frame
@@ -57,6 +62,10 @@ public class GridManager : MonoBehaviour
         {
             Destroy(child.gameObject);
         }
+
+        fill = (fillToggle.GetComponent<Toggle>().isOn);
+        completeCount = 0;
+        correctCount = 0;
         GenPuzzle();
         GenGrid();
     }
@@ -84,7 +93,6 @@ public class GridManager : MonoBehaviour
         mistakes += 1;
         Destroy(mistakeSprites[mistakes - 1]);
         if (mistakes >= maxMistakes) { PuzzleLost(); }
-
     }
 
     //Might not stay public
@@ -94,8 +102,7 @@ public class GridManager : MonoBehaviour
         uIManager.showPuzWin = true;
         wins += 1;
         timeTot += timer;
-        //this should probably change to wins + fails once I decide on a fail perameter
-        timeAvg = timeTot / wins;               
+        timeAvg = timeTot / wins;
     }
 
     public void PuzzleLost()
@@ -103,65 +110,76 @@ public class GridManager : MonoBehaviour
         timerActive = false;
         losses += 1;
         uIManager.showPuzLoss = true;
-        //do nothing with the time for now    
+        lossTot += timer;
+        attf = lossTot / losses;
     }
 
     //Generate the grid of given dimensions
     void GenGrid()
     {
-        GameObject cellRef = (GameObject)Instantiate(Resources.Load("Cell")); 
-        GameObject rowLabelRef = (GameObject)Instantiate(Resources.Load("RowLabel"));
-        GameObject colLabelRef = (GameObject)Instantiate(Resources.Load("ColLabel"));
+        GameObject cellRef = (GameObject)Instantiate(Resources.Load("Cell"));
         GameObject mistakeRef = (GameObject)Instantiate(Resources.Load("MistakeMarker"));
+        GameObject clueTileRef = (GameObject)Instantiate(Resources.Load("ClueGrid"));
 
-        for (int r = 0; r < rows; r++)
+        float posX, posY;
+        for (int r = (rows + clueNum - 1); r >= 0; r--)
         {
-            //print row label first
-            GameObject rowLabel = (GameObject)Instantiate(rowLabelRef, transform);
-            rowLabel.GetComponent<TextMeshProUGUI>().text = clues[r, 0].ToString();
-
-            float posX, posY;
-            //mathematically simplified equations - not neccesarily computationally more efficient
-            //posX = (0 * tileSize) - (cols/2 * tileSize) - 16;
-            posX = -(((cols * tileSize) + tileSize) / 2);
-            //posY = ((r * tileSize) - (rows/2 * tileSize) + tileSize);
-            posY = tileSize * (r - (rows / 2) + 1);
-
-            rowLabel.transform.localPosition = new Vector3(posX, posY, 0);
-
-            for (int c = 0; c < cols; c++)
+            int rowShift = 0;
+            for (int c = (cols - 1); c >= -(clueNum); c--)
             {
-                GameObject cell = (GameObject)Instantiate(cellRef, transform);
-                CellBehaviour cellBehaviour = cell.GetComponent<CellBehaviour>();
-                cellBehaviour.correct = solMat[r,c];
-                cellBehaviour.gridManager = this;
+                int colShift = 0;
+                if (r < rows)
+                {
+                    if (c >= 0)
+                    {
+                        GameObject cell = (GameObject)Instantiate(cellRef, transform);
+                        CellBehaviour cellBehaviour = cell.GetComponent<CellBehaviour>();
+                        cellBehaviour.correct = solMat[r, c];
+                        cellBehaviour.gridManager = this;
 
-                posX = c - (cols/2);
-                posY = r - (rows/2);
+                        posX = c - (cols / 2);
+                        posY = r - (rows / 2);
 
-                cell.transform.position = new Vector3(posX, posY, 0);
+                        cell.transform.position = new Vector3(posX, posY, 0);
+                    }
+                    else
+                    {
+                        if (clueTileGrid[r,0, (c + clueNum)] != 0  || (clueTileGrid[r,0,0] == 0 && clueTileGrid[r,0,1] == 0) && (c + clueNum == 0))
+                        {
+                            GameObject clueTile = (GameObject)Instantiate(clueTileRef, transform);
+                            clueTile.GetComponent<TextMeshPro>().text = clueTileGrid[r, 0, (c + clueNum)].ToString();
+
+                            posX = (c + rowShift) - (cols / 2);
+                            posY = r - (rows / 2);
+
+                            clueTile.transform.position = new Vector3(posX, posY, 0);
+                        }
+                        else { rowShift++; }
+                    }
+                }
+                else
+                {
+                    if (c >= 0)
+                    {
+                        if (clueTileGrid[c,1,(r - rows)] != 0 || (clueTileGrid[c,1,0] == 0 && clueTileGrid[c,1,1] == 0) && (r - rows == 0))
+                        {
+                            GameObject clueTile = (GameObject)Instantiate(clueTileRef, transform);
+                            clueTile.GetComponent<TextMeshPro>().text = clueTileGrid[c,1,(r-rows)].ToString();
+
+                            posX = c - (cols / 2);
+                            posY = (r - colShift) - (rows / 2);
+
+                            clueTile.transform.position = new Vector3(posX, posY, 0);
+                        }
+                        else { colShift++; }
+                    }
+                }
             }
-        }
-
-        for (int c = 0; c < cols; c++)
-        {
-            GameObject colLabel = (GameObject)Instantiate(colLabelRef, transform);
-            colLabel.GetComponent<TextMeshProUGUI>().text = clues[c, 1].ToString();
-
-            float posX, posY;
-            //again with the simpliefied equations being used. This positioning could be improved here, QoL ideally the text is displayed from the bottom up
-            //posX = (c * tileSize) - (cols / 2 * tileSize);
-            posX = tileSize * (c - (cols / 2));
-            //posY = ((0 * tileSize) + (rows / 2 * tileSize)) - 16;
-            posY = tileSize * ((rows - 1)/ 2);
-
-            colLabel.transform.localPosition = new Vector3(posX, posY, 0);
         }
 
         for (int i = 0; i < maxMistakes; i++)
         {
             GameObject mistakeMarker = (GameObject)Instantiate(mistakeRef, transform);
-            float posX, posY;
 
             posX = cols;
             posY = i + 1.3f;
@@ -171,9 +189,8 @@ public class GridManager : MonoBehaviour
         }
 
         Destroy(cellRef);
-        Destroy(rowLabelRef);
-        Destroy(colLabelRef);
         Destroy(mistakeRef);
+        Destroy(clueTileRef);
 
         //reset the timer to zero.
         timer = 0.0f;
@@ -186,9 +203,10 @@ public class GridManager : MonoBehaviour
         correctCount = 0;
         mistakes = 0;
         //randomize the size of the puzzle
-        rows =  5 * Random.Range(1, 2);
+        rows = 5 * Random.Range(1, 3);
         cols = rows;
         maxMistakes = rows / 2;
+        clueNum = rows / 2 + 1;
         mistakeSprites = new GameObject[maxMistakes];
 
         //init the mat
@@ -208,42 +226,63 @@ public class GridManager : MonoBehaviour
             }
         }
 
-        for (int r = 0; r < rows; r++)
+        //Calculating the clues
+        clueTileGrid = new int[rows, 2, clueNum];
+
+        //for each row
+        for (int r = 0; r < rows;  r++)
         {
-            int clueCounter = 0;
-            clues[r, 0] = "";
+            //initialise the clue values to 0
+            for (int i = 0; i < clueNum; i++)
+            {
+                clueTileGrid[r, 0, i] = 0;
+            }
+
+            int tile = 0;
+
             for (int c = 0; c < cols; c++)
             {
-                if (solMat[r, c] == true) { clueCounter += 1; }
-                else
+                if (solMat[r, c] == true)
+                //if the cell is correct, it the counter
                 {
-                    if (clueCounter != 0)
+                    clueTileGrid[r, 0, tile] += 1;
+                }
+                else
+                //if the cell is incorrect
+                {
+                    //don't count
+                    if (clueTileGrid[r,0,tile] != 0)
+                    //if there were correct cells previous to this incorrect cell
                     {
-                        clues[r, 0] = clues[r, 0] + clueCounter.ToString() + " ";
-                        clueCounter = 0;
+                        //move to the next tile
+                        tile += 1;
                     }
                 }
             }
-            if (clues[r,0] == "" || clueCounter != 0) { clues[r, 0] = clues[r, 0] + clueCounter.ToString(); }
         }
 
+        //IMPORTANT, for compatibility with the grid being generated from the BOTTOM UP rather than top down, the clues are listed from the bottom up
         for (int c = 0; c < cols; c++)
         {
-            int clueCounter = 0;
-            clues[c, 1] = "";
-            for (int r = (rows - 1); r >= 0; r--)
+            for (int i = 0; i < clueNum; i++)
             {
-                if (solMat[r, c] == true) { clueCounter += 1; }
+                clueTileGrid[c, 1, i] = 0;
+            }
+            int tile = 0;
+            for (int r = 0; r < rows; r++)
+            {
+                if (solMat[r, c] == true)
+                {
+                    clueTileGrid[c, 1, tile] += 1;
+                }
                 else
                 {
-                    if (clueCounter != 0)
+                    if(clueTileGrid[c,1,tile] != 0)
                     {
-                        clues[c, 1] = clues[c, 1] + clueCounter.ToString() + " ";
-                        clueCounter = 0;
+                        tile++;
                     }
                 }
             }
-            if (clues[c, 1] == "" || clueCounter != 0) { clues[c, 1] = clues[c, 1] + clueCounter.ToString(); }
         }
     }
 

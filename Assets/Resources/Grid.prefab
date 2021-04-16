@@ -34,7 +34,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 730, y: 325}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2883754686755229200
 MonoBehaviour:
@@ -48,4 +48,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ebcbff9dafbc4c44eb579ef4b7993e84, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  uIManager: {fileID: 0}
   fillToggle: {fileID: 9087840988040206429, guid: be69114ab6cb845448fad709f1ebebd1, type: 3}
+  timerRead: {fileID: 0}
+  wins: 0
+  losses: 0
+  timer: 0
+  timeAvg: 0
+  attf: 0
