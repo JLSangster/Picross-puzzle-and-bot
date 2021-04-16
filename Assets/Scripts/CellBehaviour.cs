@@ -5,32 +5,29 @@ using UnityEngine.UI;
 
 public class CellBehaviour : MonoBehaviour
 {
-    //flag for if it *should* be right or wrong in the solution
+    //flag for if it should be right or wrong in the solution
     public bool correct;
+
     //vars for sprite changing
     public SpriteRenderer spriteRenderer;
     public Sprite emptySprite;
     public Sprite filledSprite;
     public Sprite markedSprite;
     public Sprite wrongSprite;
+
     public GridManager gridManager;
 
+    //flags for if the cell is filled or marked
     private bool marked = false;
     private bool filled = false;
 
     // Start is called before the first frame update
-    void Start()
-    {
-
-    }
+    void Start() {    }
 
     // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    void Update() {    }
 
-    //on click, depending on the correct thing for the cell the sprite should change.
+    //on click, the sprite will change
     void OnMouseDown()
     {
         //if the fill toggle is set to fill cells
@@ -49,17 +46,19 @@ public class CellBehaviour : MonoBehaviour
                 }
                 //if the cell is incorrect
                 else {
+                    //Change the sprite and ammend current mistakes
                     spriteRenderer.sprite = wrongSprite;
                     gridManager.AddMistake();
                 }
             }
         }
+
         //if it is set to mark (or cross) cells
-        else 
+        else
         {
+            //Toggle if the cell is marked
             if (!filled)
             {
-                //Toggle if the cell is marked
                 if (!marked)
                 {
                     spriteRenderer.sprite = markedSprite;

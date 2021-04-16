@@ -11,9 +11,6 @@ public class UIManager : MonoBehaviour
     public int winWidth, winHeight;
     public GridManager gridManager;
 
-    //public GUIStyle winStyle;
-    //public GUIStyle buttonStyle;
-
     // Start is called before the first frame update
     void Start()
     {
@@ -21,65 +18,71 @@ public class UIManager : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    void Update() {    }
 
     void OnGUI()
     {
+        //Window size
         Rect winRect = new Rect((Screen.width - winWidth) / 2, (Screen.height - winHeight) / 2, winWidth, winHeight);
 
+        //Content of the main menu
         if (showMenu)
         {
-            GUI.Box(winRect, "Picross");//, winStyle);
+            GUI.Box(winRect, "Picross");
 
-            if (GUI.Button(new Rect(winRect.x + winRect.width - 170, winRect.y + winRect.height - 60, 150, 40), "Play"))//, buttonStyle))
+            //Play button to start puzzles
+            if (GUI.Button(new Rect(winRect.x + winRect.width - 170, winRect.y + winRect.height - 60, 150, 40), "Play"))
             {
                 showMenu = false;
                 gridManager.NewPuzzle();
             }
         } 
 
+        //Content of the win screen
         if (showPuzWin)
         {
-            GUI.Box(winRect, "Puzzle Complete! \n" + "Time: " + gridManager.timer.ToString());//, winStyle);
+            GUI.Box(winRect, "Puzzle Complete! \n" + "Time: " + gridManager.timer.ToString());
 
-
-            if (GUI.Button(new Rect(winRect.x + winRect.width - 170, winRect.y + winRect.height - 60, 150, 40), "Next Puzzle"))//, buttonStyle))
+            //Next puzzle button
+            if (GUI.Button(new Rect(winRect.x + winRect.width - 170, winRect.y + winRect.height - 60, 150, 40), "Next Puzzle"))
             {
                 showPuzWin = false;
                 gridManager.NewPuzzle();
             }
 
-            if (GUI.Button(new Rect(winRect.x + 20, winRect.y + winRect.height - 60, 150, 40), "Results"))//, buttonStyle))
+            //Results button
+            if (GUI.Button(new Rect(winRect.x + 20, winRect.y + winRect.height - 60, 150, 40), "Results"))
             {
+                //Close this screen, open final screen
                 showPuzWin = false;
                 showFin = true;
             }
         }
 
+        //Content of the loss screen
         if (showPuzLoss)
         {
-            GUI.Box(winRect, "Puzzle Failed.");//, winStyle);
+            GUI.Box(winRect, "Puzzle Failed.");
 
-
-            if (GUI.Button(new Rect(winRect.x + winRect.width - 170, winRect.y + winRect.height - 60, 150, 40), "Next Puzzle"))//, buttonStyle))
+            //Next puzzle button
+            if (GUI.Button(new Rect(winRect.x + winRect.width - 170, winRect.y + winRect.height - 60, 150, 40), "Next Puzzle"))
             {
                 showPuzLoss = false;
                 gridManager.NewPuzzle();
             }
 
-            if (GUI.Button(new Rect(winRect.x + 20, winRect.y + winRect.height - 60, 150, 40), "Results"))//, buttonStyle))
+            //Results button
+            if (GUI.Button(new Rect(winRect.x + 20, winRect.y + winRect.height - 60, 150, 40), "Results"))
             {
                 showPuzLoss = false;
                 showFin = true;
             }
         }
 
+        //Final window, lists number of wins, losses and average time to both.
         if (showFin)
         {
-            GUI.Box(winRect, "Results \n" + "Puzzles completed: " + gridManager.wins.ToString() + "\nPuzzles failed: " + gridManager.losses.ToString() + " \nAverage Time: " + gridManager.timeAvg + " \nATTF: " + gridManager.attf);//, winStyle);
+            GUI.Box(winRect, "Results \n" + "Puzzles completed: " + gridManager.wins.ToString() + "\nPuzzles failed: " + gridManager.losses.ToString() + " \nAverage Time: " + gridManager.timeAvg + " \nATTF: " + gridManager.attf);
         }
     }
 }
