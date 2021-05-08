@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
+using UnityEditor;
 
 public class UIManager : MonoBehaviour
 {
@@ -8,8 +10,11 @@ public class UIManager : MonoBehaviour
     public bool showPuzWin = false;
     public bool showFin = false;
     public bool showPuzLoss = false;
-    public int winWidth, winHeight;
     public GridManager gridManager;
+
+    private float windowRatio = 0.6f;
+    private bool resultsSaved = false;
+    private bool showSmall = false;
 
     // Start is called before the first frame update
     void Start()
@@ -18,12 +23,15 @@ public class UIManager : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update() {    }
+    void Update() 
+    {
+        if (Input.GetKey("escape")) { showSmall = true; }
+    }
 
     void OnGUI()
     {
         //Window size
-        Rect winRect = new Rect((Screen.width - winWidth) / 2, (Screen.height - winHeight) / 2, winWidth, winHeight);
+        Rect winRect = new Rect((Screen.width - Screen.width * windowRatio) / 2, (Screen.height - Screen.height * windowRatio) / 2, Screen.width * windowRatio, Screen.height * windowRatio);
 
         //Content of the main menu
         if (showMenu)
@@ -48,6 +56,7 @@ public class UIManager : MonoBehaviour
             {
                 showPuzWin = false;
                 gridManager.NewPuzzle();
+                resultsSaved = false;
             }
 
             //Results button
@@ -69,6 +78,7 @@ public class UIManager : MonoBehaviour
             {
                 showPuzLoss = false;
                 gridManager.NewPuzzle();
+                resultsSaved = false;
             }
 
             //Results button
@@ -83,6 +93,63 @@ public class UIManager : MonoBehaviour
         if (showFin)
         {
             GUI.Box(winRect, "Results \n" + "Puzzles completed: " + gridManager.wins.ToString() + "\nPuzzles failed: " + gridManager.losses.ToString() + " \nAverage Time: " + gridManager.timeAvg + " \nATTF: " + gridManager.attf);
+
+            if (GUI.Button(new Rect(winRect.x + winRect.width - 170, winRect.y + winRect.height - 60, 150, 40), "Save"))
+            {
+                //I want this to write to a csv file.
+                //so first it needs to check if the file exists
+                //then if it doesn't, make it
+                // if it does, there's the datetime, and all of the data thats displayed on this screen, as fields, appeneded to it.
+
+                // the file name should be picross_results.csv in the parent folder to the game
+                //string path = Picross_Results.csv";
+                //if (!File.Exists(path))
+                //{
+                //Debug.Log("File doesn't exist");
+                //create the file
+                //}
+                //else
+                //{
+                //Debug.Log("File does exist");
+                //}
+                //resultsSaved = true;
+            }
+            if (GUI.Button(new Rect(winRect.x + 20, winRect.y + winRect.height - 60, 150, 40), "Quit"))
+            {
+                //resultsSaved is always false until saving is implemented
+                if (!resultsSaved) { showSmall = true; }
+                else 
+                {
+                    //For debugging/developing purposes, check if how its running and close that
+#if UNITY_EDITOR
+                        if (UnityEditor.EditorApplication.isPlaying) { UnityEditor.EditorApplication.ExitPlaymode(); }
+                        else { Application.Quit(); }
+#else
+                    Application.Quit();
+#endif
+                }
+            }
+        }
+
+        //Show small is for confirming quitting the application without saving results.
+        if (showSmall)
+        {
+            Rect smallWin = new Rect((Screen.width - Screen.width * (windowRatio / 2)) / 2, (Screen.height - Screen.height * (windowRatio / 2)) / 2, winRect.width / 2, winRect.height / 2);
+            GUI.Box(smallWin, "Results have not been saved, Quit anyway?");
+            if (GUI.Button(new Rect(smallWin.x + 10, smallWin.y + smallWin.height - 30, 70, 20), "Yes"))
+            {
+                //For debugging/developing purposes, check if how its running and close that
+#if UNITY_EDITOR
+                if (UnityEditor.EditorApplication.isPlaying) { UnityEditor.EditorApplication.ExitPlaymode(); }
+                else { Application.Quit(); }
+#else
+                Application.Quit();
+#endif
+            }
+            if (GUI.Button(new Rect(smallWin.x + smallWin.width - 80, smallWin.y + smallWin.height - 30, 70, 20), "No"))
+            {
+                showSmall = false;
+            }
         }
     }
 }
