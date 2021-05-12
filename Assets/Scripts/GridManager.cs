@@ -302,6 +302,5 @@ public class GridManager : MonoBehaviour
             }
         }
     }
-
 }
 

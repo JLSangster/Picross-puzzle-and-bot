@@ -1,8 +1,18 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using UnityEngine;
 using UnityEditor;
+using CsvHelper;
+
+public class ResultsRecord
+{
+    public int PuzzlesCompleted { get; set; }
+    public int PuzzlesFailed { get; set; }
+    public double AverageTime { get; set; }
+    public double ATTF { get; set; }
+}
 
 public class UIManager : MonoBehaviour
 {
@@ -96,23 +106,33 @@ public class UIManager : MonoBehaviour
 
             if (GUI.Button(new Rect(winRect.x + winRect.width - 170, winRect.y + winRect.height - 60, 150, 40), "Save"))
             {
+                //change this into a list of one.
+                var results = new List<ResultsRecord>
+                {
+                    new ResultsRecord { PuzzlesCompleted = gridManager.wins, PuzzlesFailed = gridManager.losses, AverageTime = gridManager.timeAvg, ATTF = gridManager.attf }
+                };
+
                 //I want this to write to a csv file.
                 //so first it needs to check if the file exists
                 //then if it doesn't, make it
                 // if it does, there's the datetime, and all of the data thats displayed on this screen, as fields, appeneded to it.
 
                 // the file name should be picross_results.csv in the parent folder to the game
-                //string path = Picross_Results.csv";
-                //if (!File.Exists(path))
-                //{
-                //Debug.Log("File doesn't exist");
-                //create the file
-                //}
-                //else
-                //{
-                //Debug.Log("File does exist");
-                //}
-                //resultsSaved = true;
+                string path = "..\\Picross_results.csv";
+                if (!File.Exists(path))
+                {
+                    Debug.Log("File doesn't exist");
+                    using (var writer = new StreamWriter(path))
+                    using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+                    {
+                        csv.WriteRecords(results);
+                    }
+                }
+                else
+                {
+                    Debug.Log("File does exist");
+                }
+                resultsSaved = true;
             }
             if (GUI.Button(new Rect(winRect.x + 20, winRect.y + winRect.height - 60, 150, 40), "Quit"))
             {
