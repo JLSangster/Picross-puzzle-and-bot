@@ -5,6 +5,7 @@ using System.IO;
 using UnityEngine;
 using UnityEditor;
 using CsvHelper;
+using CsvHelper.TypeConversion;
 
 public class ResultsRecord
 {
@@ -25,6 +26,9 @@ public class UIManager : MonoBehaviour
     private float windowRatio = 0.6f;
     private bool resultsSaved = false;
     private bool showSmall = false;
+    private bool showSave = false;
+    private bool showDebug = false;
+    private string message = "";
 
     // Start is called before the first frame update
     void Start()
@@ -42,6 +46,7 @@ public class UIManager : MonoBehaviour
     {
         //Window size
         Rect winRect = new Rect((Screen.width - Screen.width * windowRatio) / 2, (Screen.height - Screen.height * windowRatio) / 2, Screen.width * windowRatio, Screen.height * windowRatio);
+        Rect smallWin = new Rect((Screen.width - Screen.width * (windowRatio / 2)) / 2, (Screen.height - Screen.height * (windowRatio / 2)) / 2, winRect.width / 2, winRect.height / 2);
 
         //Content of the main menu
         if (showMenu)
@@ -106,33 +111,39 @@ public class UIManager : MonoBehaviour
 
             if (GUI.Button(new Rect(winRect.x + winRect.width - 170, winRect.y + winRect.height - 60, 150, 40), "Save"))
             {
-                //change this into a list of one.
+                //Create the data record
                 var results = new List<ResultsRecord>
                 {
                     new ResultsRecord { PuzzlesCompleted = gridManager.wins, PuzzlesFailed = gridManager.losses, AverageTime = gridManager.timeAvg, ATTF = gridManager.attf }
                 };
 
-                //I want this to write to a csv file.
-                //so first it needs to check if the file exists
-                //then if it doesn't, make it
-                // if it does, there's the datetime, and all of the data thats displayed on this screen, as fields, appeneded to it.
-
-                // the file name should be picross_results.csv in the parent folder to the game
+                // the file name should be Picross_results.csv in the parent folder to the game
                 string path = "..\\Picross_results.csv";
+                
+                //If the file doesn't exist
                 if (!File.Exists(path))
                 {
-                    Debug.Log("File doesn't exist");
+                    //Create the file 
                     using (var writer = new StreamWriter(path))
-                    using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
-                    {
-                        csv.WriteRecords(results);
+                    using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture)) { 
+                        //csv.WriteRecords(results);
                     }
+                    //message = "File creation failed. ";
                 }
+                //If the file does exist
                 else
                 {
-                    Debug.Log("File does exist");
+                    //Append the re cord to the existing file
+                    var csvConfig = new CsvHelper.Configuration.CsvConfiguration(CultureInfo.InvariantCulture) { HasHeaderRecord = false };
+                        
+                    using (var stream = File.Open(path, FileMode.Append))
+                    using (var writer = new StreamWriter(stream))
+                    using (var csv = new CsvWriter(writer, csvConfig)) { csv.WriteRecords(results); }
+                    //message = "file append failed ";
                 }
+
                 resultsSaved = true;
+                showSave = true;
             }
             if (GUI.Button(new Rect(winRect.x + 20, winRect.y + winRect.height - 60, 150, 40), "Quit"))
             {
@@ -154,7 +165,6 @@ public class UIManager : MonoBehaviour
         //Show small is for confirming quitting the application without saving results.
         if (showSmall)
         {
-            Rect smallWin = new Rect((Screen.width - Screen.width * (windowRatio / 2)) / 2, (Screen.height - Screen.height * (windowRatio / 2)) / 2, winRect.width / 2, winRect.height / 2);
             GUI.Box(smallWin, "Results have not been saved, Quit anyway?");
             if (GUI.Button(new Rect(smallWin.x + 10, smallWin.y + smallWin.height - 30, 70, 20), "Yes"))
             {
@@ -170,6 +180,19 @@ public class UIManager : MonoBehaviour
             {
                 showSmall = false;
             }
+        }
+
+        //Show results save confirmation window
+        if (showSave)
+        {
+            GUI.Box(smallWin, "Results saved");
+            if (GUI.Button(new Rect(smallWin.x + (smallWin.width / 2), smallWin.y + smallWin.height - 30, 70, 20), "Ok")) { showSave = false; }
+        }
+
+        if (showDebug)
+        {
+            GUI.Box(smallWin, message);
+            if (GUI.Button(new Rect(smallWin.x + (smallWin.width / 2), smallWin.y + smallWin.height - 30, 70, 20), "Ok")) { showSave = false; }
         }
     }
 }
