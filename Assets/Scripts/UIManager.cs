@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System;
 using UnityEngine;
 using UnityEditor;
 using CsvHelper;
@@ -44,6 +45,8 @@ public class UIManager : MonoBehaviour
 
     void OnGUI()
     {
+        GUI.skin.box.wordWrap = true;
+
         //Window size
         Rect winRect = new Rect((Screen.width - Screen.width * windowRatio) / 2, (Screen.height - Screen.height * windowRatio) / 2, Screen.width * windowRatio, Screen.height * windowRatio);
         Rect smallWin = new Rect((Screen.width - Screen.width * (windowRatio / 2)) / 2, (Screen.height - Screen.height * (windowRatio / 2)) / 2, winRect.width / 2, winRect.height / 2);
@@ -117,33 +120,42 @@ public class UIManager : MonoBehaviour
                     new ResultsRecord { PuzzlesCompleted = gridManager.wins, PuzzlesFailed = gridManager.losses, AverageTime = gridManager.timeAvg, ATTF = gridManager.attf }
                 };
 
-                // the file name should be Picross_results.csv in the parent folder to the game
-                string path = "..\\Picross_results.csv";
-                
-                //If the file doesn't exist
-                if (!File.Exists(path))
-                {
-                    //Create the file 
-                    using (var writer = new StreamWriter(path))
-                    using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture)) { 
-                        //csv.WriteRecords(results);
-                    }
-                    //message = "File creation failed. ";
-                }
-                //If the file does exist
-                else
-                {
-                    //Append the re cord to the existing file
-                    var csvConfig = new CsvHelper.Configuration.CsvConfiguration(CultureInfo.InvariantCulture) { HasHeaderRecord = false };
-                        
-                    using (var stream = File.Open(path, FileMode.Append))
-                    using (var writer = new StreamWriter(stream))
-                    using (var csv = new CsvWriter(writer, csvConfig)) { csv.WriteRecords(results); }
-                    //message = "file append failed ";
-                }
+                // the file name should be Picross_results.csv in the program file
+                string path = ".\\Picross_results.csv";
 
-                resultsSaved = true;
-                showSave = true;
+                try
+                {
+                    //If the file doesn't exist
+                    if (!File.Exists(path))
+                    {
+                        //Create the file 
+                        using (var writer = new StreamWriter(path))
+                        using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+                        {
+                            csv.WriteRecords(results);
+                        }
+                        message = AppDomain.CurrentDomain.BaseDirectory + path;
+                    }
+                    //If the file does exist
+                    else
+                    {
+                        //Append the re cord to the existing file
+                        var csvConfig = new CsvHelper.Configuration.CsvConfiguration(CultureInfo.InvariantCulture) { HasHeaderRecord = false };
+
+                        using (var stream = File.Open(path, FileMode.Append))
+                        using (var writer = new StreamWriter(stream))
+                        using (var csv = new CsvWriter(writer, csvConfig)) { csv.WriteRecords(results); }
+                        message = AppDomain.CurrentDomain.BaseDirectory + path;
+                    }
+
+                    resultsSaved = true;
+                    showSave = true;
+                }
+                catch (Exception e)
+                {
+                    message = e.Message;
+                    showDebug = true;
+                }
             }
             if (GUI.Button(new Rect(winRect.x + 20, winRect.y + winRect.height - 60, 150, 40), "Quit"))
             {
@@ -185,7 +197,7 @@ public class UIManager : MonoBehaviour
         //Show results save confirmation window
         if (showSave)
         {
-            GUI.Box(smallWin, "Results saved");
+            GUI.Box(smallWin, "Results saved at " + message);
             if (GUI.Button(new Rect(smallWin.x + (smallWin.width / 2), smallWin.y + smallWin.height - 30, 70, 20), "Ok")) { showSave = false; }
         }
 
