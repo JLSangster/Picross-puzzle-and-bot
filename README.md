@@ -43,3 +43,5 @@ This data is as follows:
   The average time before a puzzle was lost, in seconds.
 This data is saved into a csv file named "Picross_results.csv" in the program folder only.
   
+INSTALLING
+The current build is available in the PicrossBuild folder. Downloading this into programs or Desktop and launching the Picross.exe inside will allow the game to run with full file permissions, allowing the results csv to be saved. In other locations the game will run without this feature.
