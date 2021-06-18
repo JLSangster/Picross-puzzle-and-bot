@@ -16,8 +16,8 @@ class puzzleModel:
         cellLoc = list(pyautogui.locateAllOnScreen('cell.png', confidence = 0.95))
         #store the coord of first cell. this is 0,0.
         self.firstCell = pyautogui.center(cellLoc[0])
-        self.cellSize = abs(self.firstCell[0] - pyautogui.center(cellLoc[1])[0])
-
+        self.cellSize = (self.firstCell[0] - pyautogui.center(cellLoc[1][0]))
+        print(self.cellSize)
         #Maximum error is one either way
         if math.isqrt(len(cellLoc)) in range(4, 6):
             self.size = 5
@@ -26,34 +26,7 @@ class puzzleModel:
         else:
             print("err")
 
-        maxClue = int(math.ceil(self.size/2))
-        self.clues = np.empty([self.size, 2, maxClue], int)
-        for r in range(self.size):
-            #rows first
-            for clue in range(maxClue, 0 , -1):
-                print(clue)
-                #move to cell just for user feedback
-                pyautogui.moveTo(((self.firstCell[0] - (clue * self.cellSize)), self.firstCell[1] + (r * self.cellSize)))
-                #calculate the region to search in
-                reg = (pyautogui.position()[0] - int(self.cellSize / 2), pyautogui.position()[1] - int(self.cellSize / 2), self.cellSize, self.cellSize)
-                
-                #check for each of the clues - there is probably a better way to do this.
-                for i in range(10):
-                    if pyautogui.locateOnScreen((str(i) + ".png"),region = reg, confidence = 0.85) != None:
-                        self.clues[r,0,abs(clue-maxClue)] = i
-                        break
-
-                #same again for columns
-                pyautogui.moveTo(((self.firstCell[0] + (r * self.cellSize), self.firstCell[1] - (clue * self.cellSize))))
-                reg = (pyautogui.position()[0] - int(self.cellSize / 2), pyautogui.position()[1] - int(self.cellSize / 2), self.cellSize, self.cellSize)
-                
-                #check for each of the clues - there is probably a better way to do this.
-                for i in range(10):
-                    if pyautogui.locateOnScreen((str(i) + ".png"),region = reg, confidence = 0.9) != None:
-                        self.clues[r,1,abs(clue-maxClue)] = i
-                        break
-
-
+        #read the clues using similar method
 
         #create the mats
         #A square mat of the grid
