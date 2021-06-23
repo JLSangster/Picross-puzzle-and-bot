@@ -31,7 +31,6 @@ class puzzleModel:
         for r in range(self.size):
             #rows first
             for clue in range(maxClue, 0 , -1):
-                print(clue)
                 #move to cell just for user feedback
                 pyautogui.moveTo(((self.firstCell[0] - (clue * self.cellSize)), self.firstCell[1] + (r * self.cellSize)))
                 #calculate the region to search in
@@ -48,36 +47,47 @@ class puzzleModel:
                 reg = (pyautogui.position()[0] - int(self.cellSize / 2), pyautogui.position()[1] - int(self.cellSize / 2), self.cellSize, self.cellSize)
                 
                 #check for each of the clues - there is probably a better way to do this.
-                for i in range(10):
+                for i in range(self.size):
                     if pyautogui.locateOnScreen((str(i) + ".png"),region = reg, confidence = 0.9) != None:
                         self.clues[r,1,abs(clue-maxClue)] = i
                         break
-
-
 
         #create the mats
         #A square mat of the grid
         #four possible values, marked, marked, incorrect, correct
         #empty, marked, incorrect, correct
         self.grid = np.full((self.size, self.size), "empty")
-        #a matrix of the clues - similar to the one in the game
-        
-
 
     def selectCell(self,row, col):
         #work out what the xcoord and ycoord for that cell are
+        (xcoord, ycoord) = (int(self.firstCell[0] + (self.cellSize * col)), int(self.firstCell[1] + (self.cellSize * row)))
         pyautogui.click(xcoord, ycoord)
+
         #read what the cell changes to
         #given that the mouse should be in the center of the cell, we can use the colour of that pixel to decide
         #gray is marked, red is incorrect, black is correct
-        if pyautogui.pixelMatchesColor(xcoord,ycoord, (127, 127, 127), tolerance = 10):
-            self.grid[row][col] = "marked"
-        elif pyautogui.pixelMatchesColor(xcoord, ycoord, (0, 0, 0), tolerance = 10):
-            self.grid[row][col] = "correct"
-        elif pyautogui.pixelMatchesColor(xcoord, ycoord, (237, 28, 36), tolerance = 10):
-            self.grid[row][col] = "incorrect"
-        else:
-            print(err)
+        checked = False
+        while checked == False:
+            #Due to an issue in pyautogui, repeat the pixel check until this identifies the new cell status
+            try:
+                print(pyautogui.pixel(pyautogui.position()[0], pyautogui.position()[1]))
+                if pyautogui.pixelMatchesColor(xcoord,ycoord, (127, 127, 127), tolerance = 20):
+                    self.grid[row][col] = "marked"
+                    print("marked")
+                    checked = True
+                elif pyautogui.pixelMatchesColor(xcoord, ycoord, (0, 0, 0), tolerance = 20):
+                    self.grid[row][col] = "correct"
+                    print("correct")
+                    checked = True
+                elif pyautogui.pixelMatchesColor(xcoord, ycoord, (237, 28, 36), tolerance = 20):
+                    self.grid[row][col] = "incorrect"
+                    print("incorrect")
+                    checked = True
+                else:
+                    print("oops, something went wrong with detecting the cell")
+            except:
+                print("oops, something went wrong.")
+
     
     def toggleFill(self):
         #work out where on the screen the toggle is
@@ -101,6 +111,9 @@ class puzzleModel:
 
 def main():
     puzzleModel.parsePuzzle(puzzleModel)
+    puzzleModel.selectCell(puzzleModel,0,0)
+    puzzleModel.selectCell(puzzleModel,4,4)
+    puzzleModel.selectCell(puzzleModel,2,4)
     #puzzleModel.selectCell(puzzleModel,1,1)
 
 if __name__ == "__main__":
