@@ -12,7 +12,7 @@ class puzzleModel:
         self.parsePuzzle(self)
 
     def parsePuzzle(self):
-        print("called")
+        print("Parsing")
         #click on window to ensure puzzle is in focus
         pyautogui.click(10,10)
         #find the size of the grid
@@ -21,7 +21,6 @@ class puzzleModel:
         #store the coord of first cell. this is 0,0.
         self.firstCell = pyautogui.center(cellLoc[0])
         pyautogui.moveTo(self.firstCell)
-        time.sleep(1)
         self.cellSize = abs(self.firstCell[0] - pyautogui.center(cellLoc[1])[0])
 
         #locate the toggle
@@ -66,6 +65,7 @@ class puzzleModel:
         #four possible values, marked, marked, incorrect, correct
         #empty, marked, incorrect, correct
         self.grid = np.full((self.size, self.size), "empty")
+        print("Parsing complete")
 
     def selectCell(self,x, y):
         #work out what the xcoord and ycoord for that cell are
@@ -77,7 +77,6 @@ class puzzleModel:
         #gray is marked, red is incorrect, black is correct
         counter = 0
         checked = False
-        print("checking")
         while not(checked):
             #add timer to prevent infinite loop
             if counter > 10:
@@ -87,13 +86,13 @@ class puzzleModel:
             #Due to an issue in pyautogui, repeat the pixel check until this identifies the new cell status
             try:
                 if pyautogui.pixelMatchesColor(xcoord,ycoord, (127, 127, 127), tolerance = 20):
-                    self.grid[x][y] = "marked"
+                    self.grid[x][y] = "mark"
                     checked = True
                 elif pyautogui.pixelMatchesColor(xcoord, ycoord, (0, 0, 0), tolerance = 20):
-                    self.grid[x][y] = "correct"
+                    self.grid[x][y] = "corr"
                     checked = True
                 elif pyautogui.pixelMatchesColor(xcoord, ycoord, (237, 28, 36), tolerance = 20):
-                    self.grid[x][y] = "incorrect"
+                    self.grid[x][y] = "incor"
                     checked = True
                 else:
                     print("oops, something went wrong with detecting the cell")
@@ -120,16 +119,24 @@ class puzzleModel:
                 self.selectCell(self, startX, startY + x)
         
 
-    #def markFullRow(x, y, rowBool):
+    def fillFullRow(self, x, y, rowBool, fillBool):
         #check toggle is on tright mode
         #for length of whole grid
-        #if rowBool
-        #selectCell(row, x)
-        #else
-        #selectCell(x, col)
+        if (self.togFill != fillBool):
+            self.toggleFill(self)
+        for each in range(self.size):
+            #if filling a row
+            if rowBool:
+                if (self.grid[each, y] == "empty"):
+                    self.selectCell(self, each, y)
+            else:
+                if (self.grid[x, each] == "empty"):
+                    self.selectCell(self, x, each)
 
 def main():
     puzzleModel.parsePuzzle(puzzleModel)
+    puzzleModel.fillFullRow(puzzleModel, 2, 3, False, True)
+    puzzleModel.fillFullRow(puzzleModel, 4, 0, True, False)
     
 if __name__ == "__main__":
     main()
