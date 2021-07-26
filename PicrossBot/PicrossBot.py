@@ -69,8 +69,7 @@ class puzzleModel:
 
         #create the mats
         #A square mat of the grid
-        #four possible values, marked, marked, incorrect, correct
-        #empty, marked, incorrect, correct
+        #four possible values: empty, marked, incorrect, correct
         self.grid = np.full((self.size, self.size), "empty")
         print("Parsing complete")
 
@@ -79,6 +78,7 @@ class puzzleModel:
         (xcoord, ycoord) = (int(self.firstCell[0] + (self.cellSize * x)), int(self.firstCell[1] + (self.cellSize * y)))
         pyautogui.click(xcoord, ycoord)
 
+        #if self.grid[x][y] == "empty":
         #read what the cell changes to
         #given that the mouse should be in the center of the cell, we can use the colour of that pixel to decide
         #gray is marked, red is incorrect, black is correct
@@ -115,7 +115,7 @@ class puzzleModel:
         self.togFill = not(self.togFill)
         
 
-    def fillCells(self,fillNum, startX, startY, rowBool, fillBool):
+    def fillCells(self, fillNum, startX, startY, rowBool, fillBool):
         #check if it fills no cells, skip
         if fillNum != 0:
             #check what mode the toggle is, and that it is what it needs to be
@@ -123,9 +123,11 @@ class puzzleModel:
                 self.toggleFill(self)        
             for x in range(fillNum):
                 if rowBool:
-                    self.selectCell(self, startX + x, startY)
+                    if (self.grid[startX + x][startY] == "empty"):
+                        self.selectCell(self, startX + x, startY)
                 else:
-                    self.selectCell(self, startX, startY + x)
+                    if (self.grid[startX][startY + x] == "empty"):
+                        self.selectCell(self, startX, startY + x)
         
 
     def fillFullRow(self, coord, rowBool, fillBool):
@@ -146,6 +148,7 @@ class puzzleModel:
         #Check for clues that are equal to size
         print(self.clues)
         clueLoc = np.where(self.clues == self.size)
+        print("full rows")
         for i in range(len(clueLoc[0])):
             rowFill = clueLoc[1][i] == 0
             self.fillFullRow(self, clueLoc[0][i], rowFill, True)
@@ -153,6 +156,7 @@ class puzzleModel:
         
         #Check for "0" clues
         clueLoc = np.where(self.clues == 0)
+        print("empty rows")
         for i in range(len(clueLoc[0])):
             rowFill = clueLoc[1][i] == 0
             self.fillFullRow(self, clueLoc[0][i], rowFill, False)
@@ -162,6 +166,7 @@ class puzzleModel:
         
         #Clues that completely fill a row
         #first it'll have to figure out how many clues there actually are.
+        print("+1 clues that fill row")
         for i in range(self.size):
             for j in range(2):
                 gapCount = len(np.where(self.clues[i][j] > 0)[0]) - 1
@@ -169,41 +174,40 @@ class puzzleModel:
                     #cellplace tracks what cell in the line the bot has gotten to
                     cellPlace = 0
                     if j == 0:
-                        for e in self.clues[i][j]:
-                            if e != 0:
-                                self.fillCells(self, e, cellPlace, i, (j == 0), True)
-                                cellPlace += e
-                                self.fillCells(self, 1, cellPlace, i, (j == 0), False)
-                                cellPlace += 1
+                        for k in range(len(self.clues[i][j])):
+                            if self.clues[i][j][k] != 0:
+                                self.fillCells(self, self.clues[i][j][k], cellPlace, i, (j == 0), True)
+                                cellPlace += self.clues[i][j][k]
+                                if cellPlace != self.size:
+                                    self.fillCells(self, 1, cellPlace, i, (j == 0), False)
+                                    cellPlace += 1
+                                self.clues[i][j][k] = 0
                     else:
-                        for e in self.clues[i][j]:
-                            if e != 0:
-                                self.fillCells(self, e, i, cellPlace, (j == 0), True)
-                                cellPlace += e
-                                self.fillCells(self, 1, i, cellPlace, (j == 0), False)
-                                cellPlace += 1
-        #clues are always going to be less than or equal to size.
-        #thats probably the right way to do that.
-        #so in the most inside arrays count the legit clues
-        #then it's size - legit clues + 1
-
-        #what about summing those clues? 
-
-
-
-
-
+                        for k in range(len(self.clues[i][j])):
+                            if self.clues[i][j][k] != 0:
+                                self.fillCells(self, self.clues[i][j][k], i, cellPlace, (j == 0), True)
+                                cellPlace += self.clues[i][j][k]
+                                if cellPlace != self.size:
+                                    self.fillCells(self, 1, i, cellPlace, (j == 0), False)
+                                    cellPlace += 1
+                                self.clues[i][j][k] = 0
+                                
+        #A clue is more than half the size
+        clueLoc = np.where(self.clues > (self.size / 2))
+        print("half clues")
+        print(clueLoc[0])
+        for i in range(len(clueLoc[0])):
+            #fillNum indicates how many either side should be missed
+            fillNum = self.size - self.clues[clueLoc[0][i]][clueLoc[1][i]][clueLoc[2][i]]
+            #if clueLoc[1] == 0, its a row clue
+            if clueLoc[1][i] == 0:
+                self.fillCells(self, self.size - (fillNum * 2), fillNum, clueLoc[0][i], clueLoc[1][i] == 0, True)
+                self.clues[clueLoc[0][i]][clueLoc[1][i]][clueLoc[2][i]] = 0
+            else:
+                self.fillCells(self, self.size - (fillNum * 2), clueLoc[0][i], fillNum, clueLoc[1][i] == 0, True)
+                self.clues[clueLoc[0][i]][clueLoc[1][i]][clueLoc[2][i]] = 0
 
 #class puzzleSolver: #Unsure if one or two classes make more sense
-
-    #def __init__ (self, puzzleModel):
-        #This should only look at the grid and clues as it is,
-        
-    #Right how am I doing this?
-    #Theres a logic to follow, 
-    #It determines the correct thing to do
-    #Then calls the right function to do that in the model
-    #def Solve(self, puzzleModel):
 
 
 def main():
