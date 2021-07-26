@@ -34,7 +34,7 @@ public class CellBehaviour : MonoBehaviour
         if (gridManager.GetFill())
         {
             //If the cell is not marked or already filled
-            if (!marked)
+            if (!(marked || filled))
             {
                 if (correct) 
                 {
