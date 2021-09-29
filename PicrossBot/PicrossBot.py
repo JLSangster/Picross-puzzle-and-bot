@@ -82,15 +82,17 @@ class puzzleModel:
         #workingClues holds clues that are still relevant, e.g, clues that have not been fulfilled,
         #avoids solver filling cells that have allready been filled by a previous rule, and to go back and check what those clues were
         self.workingClues = self.clues
-        print("Parsing complete")        
+        print("Parsing complete")  
+        print(self.grid.shape)      
 
 class puzzleSolver:
     def selectCell(self, puzzleModel, x, y):
+        print("filling")
         #work out what the xcoord and ycoord for that cell are
         (xcoord, ycoord) = (int(puzzleModel.firstCell[0] + (puzzleModel.cellSize * x)), int(puzzleModel.firstCell[1] + (puzzleModel.cellSize * y)))
         pyautogui.click(xcoord, ycoord)
 
-        #if self.grid[x][y] == "empty":
+        #if self.grid[y][x] == "empty":
         #read what the cell changes to
         #given that the mouse should be in the center of the cell, we can use the colour of that pixel to decide
         #gray is marked, red is incorrect, black is correct
@@ -105,13 +107,13 @@ class puzzleSolver:
             #Due to an issue in pyautogui, repeat the pixel check until this identifies the new cell status
             try:
                 if pyautogui.pixelMatchesColor(xcoord,ycoord, (127, 127, 127), tolerance = 20):
-                    puzzleModel.grid[x][y] = "mark"
+                    puzzleModel.grid[y][x] = "mark"
                     checked = True
                 elif pyautogui.pixelMatchesColor(xcoord, ycoord, (0, 0, 0), tolerance = 20):
-                    puzzleModel.grid[x][y] = "corr"
+                    puzzleModel.grid[y][x] = "corr"
                     checked = True
                 elif pyautogui.pixelMatchesColor(xcoord, ycoord, (237, 28, 36), tolerance = 20):
-                    puzzleModel.grid[x][y] = "incor"
+                    puzzleModel.grid[y][x] = "incor"
                     checked = True
                 else:
                     print("oops, something went wrong with detecting the cell")
@@ -119,6 +121,8 @@ class puzzleSolver:
             except:
                 print("oops, something went wrong.")
                 counter += 1
+
+        print("Filled")
 
     
     def toggleFill(self, puzzleModel):
@@ -128,12 +132,14 @@ class puzzleSolver:
         
 
     def fillCells(self, puzzleModel, fillNum, startX, startY, rowBool, fillBool):
+        print("filling ", fillNum)
         #check if it fills no cells, skip
         if fillNum != 0:
             #check what mode the toggle is, and that it is what it needs to be
             if (puzzleModel.togFill != fillBool):
                 self.toggleFill(self, puzzleModel)        
             for x in range(fillNum):
+                print(x)
                 if rowBool:
                     if (puzzleModel.grid[startX + x][startY] == "empty"):
                         self.selectCell(self, puzzleModel, startX + x, startY)
@@ -158,7 +164,7 @@ class puzzleSolver:
 
     def phaseOne(self, puzzleModel):
         print("Phase One")
-        input(str("hit enter"))
+        #input(str("hit enter"))
         #Check for "0" clues
         clueLoc = np.where(puzzleModel.workingClues == 0)
         for i in range(len(clueLoc[0])):
@@ -205,7 +211,7 @@ class puzzleSolver:
     def phaseTwo(self, puzzleModel):
         #check for clues that have been filled.
         print("Phase Two")
-        input(str("hit enter"))
+        #input(str("hit enter"))
 
         #Mark any empty cells where all clues have been fulfilled
         #for each column
@@ -213,12 +219,12 @@ class puzzleSolver:
             corrCount = 0
             #count the number of correct cells in the column
             for y in range(puzzleModel.size):
-                if puzzleModel.grid[x][y] == "corr":
+                if puzzleModel.grid[y][x] == "corr":
                     corrCount += 1
             #if the number of correct clues = the sum of the clues
             if corrCount == np.sum(np.where(abs(puzzleModel.clues[x][1]) <= puzzleModel.size, puzzleModel.clues[x][1], 0)):
                 for y in range(puzzleModel.size):
-                    if puzzleModel.grid[x][y] == "empty":
+                    if puzzleModel.grid[y][x] == "empty":
                         self.fillCells(self, puzzleModel, 1, x, y, False, False)
                 np.where(puzzleModel.workingClues[x][1] != 0, 0, 0)
 
@@ -227,32 +233,41 @@ class puzzleSolver:
             corrCount = 0
             #count the number of correct cells in the column
             for x in range(puzzleModel.size):
-                if puzzleModel.grid[x][y] == "corr":
-                    corrCount += 1
+                if puzzleModel.grid[y][x] == "corr":
+                     corrCount += 1
             #if the number of correct clues = the sum of the clues
             if corrCount == np.sum(np.where(abs(puzzleModel.clues[y][0]) <= puzzleModel.size, puzzleModel.clues[y][1], 0)):
                 for y in range(puzzleModel.size):
-                    if puzzleModel.grid[x][y] == "empty":
-                        self.fillCells(self, puzzleModel, 1, x, y, False, False)
+                    if puzzleModel.grid[y][x] == "empty":
+                       self.fillCells(self, puzzleModel, 1, x, y, False, False)
                 np.where(puzzleModel.workingClues[y][0] != 0, 0, 0)
         
+
         #Where there is a correct cell within (clue[0]) range of the edge
         #for each set of clues
+        #this appears to work for rows - add the same thing in for cols
         for line in range(puzzleModel.size):
-            print(line)
             #I want the first non-zero clue, not the first clue
             if np.any(puzzleModel.workingClues[line][0] != 0):
                 firstClue = (np.where(puzzleModel.workingClues[line][0] != 0)[0][0])
-                print(puzzleModel.workingClues[line][0][firstClue])
                 #check for a correct cell in the grid within the range of the last or first clue of the edge
-                if np.any(puzzleModel.grid[line][0:puzzleModel.workingClues[line][0][firstClue]] == "corr"):
-                    print(True)
-                    print(np.where(puzzleModel.grid[line] == "corr")[0][0])
+                if np.any((puzzleModel.grid[:][line])[:puzzleModel.workingClues[line][0][firstClue]] == "corr"):
                     #if found, fill from that filled cell to the clue - 1
-                    self.fillCells(self, puzzleModel, puzzleModel.workingClues[line][0][firstClue] - np.where(puzzleModel.grid[line] == "corr")[0][0], 0, line, True, True)
-            #if np.any(puzzleModel.grid[line][puzzleModel.size - puzzleModel.workingClues[line][0][-1]] == "corr"):
-            #    self.fillCells(self, puzzleModel,
-            input(str("hit enter"))
+                    self.fillCells(self, puzzleModel, puzzleModel.workingClues[line][0][firstClue] - np.where(puzzleModel.grid[:][line] == "corr")[0][0] - 1, np.where(puzzleModel.grid[:][line] == "corr")[0][0], line, True, True)
+                if np.any((puzzleModel.grid[:][line])[puzzleModel.size - puzzleModel.workingClues[line][0][-1]:] == "corr"):
+                    self.fillCells(self, puzzleModel, puzzleModel.workingClues[line][0][-1] - (puzzleModel.size - np.where(puzzleModel.grid[:][line] == "corr")[0][-1]), puzzleModel.size - puzzleModel.workingClues[line][0][-1], line, True, True)
+            
+            #Do the same for col
+            if np.any(puzzleModel.workingClues[line][1] != 0):
+                firstClue = (np.where(puzzleModel.workingClues[line][1] != 0)[0][0])
+                #check for a correct cell in the grid within the range of the last or first clue of the edge
+                if np.any((puzzleModel.grid[:, line])[:puzzleModel.workingClues[line][1][firstClue]] == "corr"):
+                    #if found, fill from that filled cell to the clue - 1
+                    self.fillCells(self, puzzleModel, puzzleModel.workingClues[line][1][firstClue] - np.where(puzzleModel.grid[:, line] == "corr")[0][0], line, np.where(puzzleModel.grid[:, line] == "corr")[0][0], False, True)
+                if np.any((puzzleModel.grid[:, line])[puzzleModel.size - puzzleModel.workingClues[line][1][-1]:] == "corr"):
+                    self.fillCells(self, puzzleModel, puzzleModel.workingClues[line][1][-1] - (puzzleModel.size - np.where(puzzleModel.grid[:, line] == "corr")[0][-1]), line, puzzleModel.size - puzzleModel.workingClues[line][1][-1], False, True)
+
+            #input(str("hit enter"))
 
     def phaseThree(self, puzzleModel):
         print("Phase Three")
@@ -265,7 +280,7 @@ class puzzleSolver:
             emptCells = 0
             #find the gap by iterating through to the first empty cell
             for y in range(puzzleModel.size):
-                if puzzleModel.grid[x][y] == "empty":
+                if puzzleModel.grid[y][x] == "empty":
                     if emptCells == 0:
                         #storing that coord as the first cell in the gap
                         startX = x
@@ -273,7 +288,7 @@ class puzzleSolver:
                     #counting the no. of empty cells
                     emptCells += 1
                 #break at the end of the gap
-                elif (puzzleModel.grid[x][y] != "empty") & (emptCells != 0):
+                elif (puzzleModel.grid[y][x] != "empty") & (emptCells != 0):
                     break
                 #continue through to the end of the line
                 #if there is another empty cell, break and move to the next line.
@@ -313,7 +328,7 @@ class puzzleSolver:
             emptCells = 0
             #find the gap by iterating through to the first empty cell
             for x in range(puzzleModel.size):
-                if puzzleModel.grid[x][y] == "empty":
+                if puzzleModel.grid[y][x] == "empty":
                     if emptCells == 0:
                         #storing that coord as the first cell in the gap
                         startX = x
@@ -321,7 +336,7 @@ class puzzleSolver:
                     #counting the no. of empty cells
                     emptCells += 1
                 #until another filled cell
-                elif (puzzleModel.grid[x][y] != "empty") & (emptCells != 0):
+                elif (puzzleModel.grid[y][x] != "empty") & (emptCells != 0):
                     break
                 #continue through to the end of the line
                 #if there is another empty cell, break and move to the next line.
