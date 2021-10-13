@@ -212,7 +212,7 @@ class puzzleSolver:
         #check for clues that have been filled.
         print("Phase Two")
         #input(str("hit enter"))
-
+        
         #Mark any empty cells where all clues have been fulfilled
         #for each column
         for x in range(puzzleModel.size):
@@ -234,40 +234,53 @@ class puzzleSolver:
             #count the number of correct cells in the column
             for x in range(puzzleModel.size):
                 if puzzleModel.grid[y][x] == "corr":
-                     corrCount += 1
+                    corrCount += 1
             #if the number of correct clues = the sum of the clues
             if corrCount == np.sum(np.where(abs(puzzleModel.clues[y][0]) <= puzzleModel.size, puzzleModel.clues[y][1], 0)):
                 for y in range(puzzleModel.size):
                     if puzzleModel.grid[y][x] == "empty":
-                       self.fillCells(self, puzzleModel, 1, x, y, False, False)
+                        self.fillCells(self, puzzleModel, 1, x, y, False, False)
                 np.where(puzzleModel.workingClues[y][0] != 0, 0, 0)
-        
 
-        #Where there is a correct cell within (clue[0]) range of the edge
+        #Where there is a correct cell within (clue[0]) range of the edge, or one beyond that.
         #for each set of clues
-        #this appears to work for rows - add the same thing in for cols
+        #rows first
         for line in range(puzzleModel.size):
-            #I want the first non-zero clue, not the first clue
+            #skipping lines that are already satisfied
             if np.any(puzzleModel.workingClues[line][0] != 0):
-                firstClue = (np.where(puzzleModel.workingClues[line][0] != 0)[0][0])
-                #check for a correct cell in the grid within the range of the last or first clue of the edge
+                #get the position of the first valid clue in the line
+                firstClue = (np.where(puzzleModel.clues[line][0] <= puzzleModel.size)[0][0])
+                #check for a correct cell in the grid within the range of the first clue of the edge
                 if np.any((puzzleModel.grid[:][line])[:puzzleModel.workingClues[line][0][firstClue]] == "corr"):
                     #if found, fill from that filled cell to the clue - 1
                     self.fillCells(self, puzzleModel, puzzleModel.workingClues[line][0][firstClue] - np.where(puzzleModel.grid[:][line] == "corr")[0][0] - 1, np.where(puzzleModel.grid[:][line] == "corr")[0][0], line, True, True)
+                #same for again for the last clue
                 if np.any((puzzleModel.grid[:][line])[puzzleModel.size - puzzleModel.workingClues[line][0][-1]:] == "corr"):
                     self.fillCells(self, puzzleModel, puzzleModel.workingClues[line][0][-1] - (puzzleModel.size - np.where(puzzleModel.grid[:][line] == "corr")[0][-1]), puzzleModel.size - puzzleModel.workingClues[line][0][-1], line, True, True)
+                
+                #if the cell at the clue value is filled, then the edge cell can be marked
+                if puzzleModel.grid[line][puzzleModel.workingClues[line][0][firstClue]] == "corr":
+                    self.fillCells(self, puzzleModel, 1, 0, line, True, False)
+                if puzzleModel.grid[line][puzzleModel.size - int(puzzleModel.workingClues[line][0][-1]) - 1] == "corr":
+                    self.fillCells(self, puzzleModel, 1, puzzleModel.size - 1, line, True, False)
+
             
             #Do the same for col
             if np.any(puzzleModel.workingClues[line][1] != 0):
-                firstClue = (np.where(puzzleModel.workingClues[line][1] != 0)[0][0])
-                #check for a correct cell in the grid within the range of the last or first clue of the edge
+                firstClue = (np.where(puzzleModel.clues[line][1] <= puzzleModel.size)[0][0])
+                #check for a correct cell in the grid within the range of first clue of the edge
                 if np.any((puzzleModel.grid[:, line])[:puzzleModel.workingClues[line][1][firstClue]] == "corr"):
                     #if found, fill from that filled cell to the clue - 1
                     self.fillCells(self, puzzleModel, puzzleModel.workingClues[line][1][firstClue] - np.where(puzzleModel.grid[:, line] == "corr")[0][0], line, np.where(puzzleModel.grid[:, line] == "corr")[0][0], False, True)
+                #same again for the last clue
                 if np.any((puzzleModel.grid[:, line])[puzzleModel.size - puzzleModel.workingClues[line][1][-1]:] == "corr"):
                     self.fillCells(self, puzzleModel, puzzleModel.workingClues[line][1][-1] - (puzzleModel.size - np.where(puzzleModel.grid[:, line] == "corr")[0][-1]), line, puzzleModel.size - puzzleModel.workingClues[line][1][-1], False, True)
-
-            #input(str("hit enter"))
+             
+                #if the cell at the clue value is filled, then the edge cell can be marked
+                if puzzleModel.grid[:, line][puzzleModel.workingClues[line][1][firstClue]] == "corr":
+                    self.fillCells(self, puzzleModel, 1, line, 0, False, False)
+                if puzzleModel.grid[:, line][puzzleModel.size - puzzleModel.workingClues[line][1][-1] - 1] == "corr":
+                    self.fillCells(self, puzzleModel, 1, line, puzzleModel.size - 1, False, False)
 
     def phaseThree(self, puzzleModel):
         print("Phase Three")
