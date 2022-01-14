@@ -82,20 +82,19 @@ class puzzleModel:
         #workingClues holds clues that are still relevant, e.g, clues that have not been fulfilled,
         #avoids solver filling cells that have allready been filled by a previous rule, and to go back and check what those clues were
         self.workingClues = self.clues
+        print(self.clues)
         print("Parsing complete")  
         print(self.grid.shape)      
 
 class puzzleSolver:
     def selectCell(self, puzzleModel, x, y):
-        print("filling")
         #work out what the xcoord and ycoord for that cell are
         (xcoord, ycoord) = (int(puzzleModel.firstCell[0] + (puzzleModel.cellSize * x)), int(puzzleModel.firstCell[1] + (puzzleModel.cellSize * y)))
         pyautogui.click(xcoord, ycoord)
 
-        #if self.grid[y][x] == "empty":
         #read what the cell changes to
         #given that the mouse should be in the center of the cell, we can use the colour of that pixel to decide
-        #gray is marked, red is incorrect, black is correct
+        #gray is marked, red is incorrect, black is correct - in theory this should be faster than the image rec used earlier
         counter = 0
         checked = False
         while not(checked):
@@ -104,49 +103,46 @@ class puzzleSolver:
                 #change to error message
                 print("Stuck in loop. please close and retry.")
                 break
-            #Due to an issue in pyautogui, repeat the pixel check until this identifies the new cell status
             try:
-                if pyautogui.pixelMatchesColor(xcoord,ycoord, (127, 127, 127), tolerance = 20):
+                reg = (pyautogui.position()[0] - int(puzzleModel.cellSize / 2), pyautogui.position()[1] - int(puzzleModel.cellSize / 2), puzzleModel.cellSize, puzzleModel.cellSize)
+                if pyautogui.locateOnScreen("mark.PNG", region = reg, confidence = 0.85):
                     puzzleModel.grid[y][x] = "mark"
                     checked = True
-                elif pyautogui.pixelMatchesColor(xcoord, ycoord, (0, 0, 0), tolerance = 20):
-                    puzzleModel.grid[y][x] = "corr"
-                    checked = True
-                elif pyautogui.pixelMatchesColor(xcoord, ycoord, (237, 28, 36), tolerance = 20):
+                elif pyautogui.locateOnScreen("incor.PNG", region = reg, confidence = 0.85):
                     puzzleModel.grid[y][x] = "incor"
                     checked = True
+                elif pyautogui.locateOnScreen("corr.PNG", region = reg, confidence = 0.87):
+                    puzzleModel.grid[y][x] = "corr"
+                    checked = True
                 else:
+                    puzzleModel.grid[y][x] = "empty"
                     print("oops, something went wrong with detecting the cell")
                     counter += 1
             except:
                 print("oops, something went wrong.")
                 counter += 1
 
-        print("Filled")
-
+        print(puzzleModel.grid[y][x])
+        print('---')
     
     def toggleFill(self, puzzleModel):
         #Click the toggle button
         pyautogui.click(puzzleModel.togLoc)
-        puzzleModel.togFill = not(puzzleModel.togFill)
-        
+        puzzleModel.togFill = not(puzzleModel.togFill)        
 
     def fillCells(self, puzzleModel, fillNum, startX, startY, rowBool, fillBool):
-        print("filling ", fillNum)
         #check if it fills no cells, skip
         if fillNum != 0:
             #check what mode the toggle is, and that it is what it needs to be
             if (puzzleModel.togFill != fillBool):
                 self.toggleFill(self, puzzleModel)        
             for x in range(fillNum):
-                print(x)
                 if rowBool:
                     if (puzzleModel.grid[startX + x][startY] == "empty"):
                         self.selectCell(self, puzzleModel, startX + x, startY)
                 else:
                     if (puzzleModel.grid[startX][startY + x] == "empty"):
-                        self.selectCell(self, puzzleModel, startX, startY + x)
-        
+                        self.selectCell(self, puzzleModel, startX, startY + x)        
 
     def fillFullRow(self, puzzleModel, coord, rowBool, fillBool):
         #check toggle is on tright mode
@@ -180,7 +176,7 @@ class puzzleSolver:
             puzzleModel.workingClues[clueLoc[0][i]][clueLoc[1][i]][clueLoc[2][i]] = 0
 
         #change the empty and 10 values to 0, now that all 0 clues have been handled
-        puzzleModel.workingClues = np.where(abs(puzzleModel.workingClues) >= 10, 0, puzzleModel.workingClues)
+        puzzleModel.workingClues = np.where(abs(puzzleModel.workingClues) >= puzzleModel.size, 0, puzzleModel.workingClues)
 
         #Clues that completely fill a row
         for i in range(puzzleModel.size):
@@ -213,7 +209,8 @@ class puzzleSolver:
         print("Phase Two")
         #input(str("hit enter"))
         
-        #Mark any empty cells where all clues have been fulfilled
+        print("Mark any empty cells where all clues have been fulfilled")
+        input()
         #for each column
         for x in range(puzzleModel.size):
             corrCount = 0
@@ -227,7 +224,6 @@ class puzzleSolver:
                     if puzzleModel.grid[y][x] == "empty":
                         self.fillCells(self, puzzleModel, 1, x, y, False, False)
                 np.where(puzzleModel.workingClues[x][1] != 0, 0, 0)
-
         #same for rows
         for y in range(puzzleModel.size):
             corrCount = 0
@@ -242,7 +238,8 @@ class puzzleSolver:
                         self.fillCells(self, puzzleModel, 1, x, y, False, False)
                 np.where(puzzleModel.workingClues[y][0] != 0, 0, 0)
 
-        #Where there is a correct cell within (clue[0]) range of the edge, or one beyond that.
+        print("Where there is a correct cell within (clue[0]) range of the edge, or one beyond that.")
+        input()
         #for each set of clues
         #rows first
         for line in range(puzzleModel.size):
@@ -263,8 +260,6 @@ class puzzleSolver:
                     self.fillCells(self, puzzleModel, 1, 0, line, True, False)
                 if puzzleModel.grid[line][puzzleModel.size - int(puzzleModel.workingClues[line][0][-1]) - 1] == "corr":
                     self.fillCells(self, puzzleModel, 1, puzzleModel.size - 1, line, True, False)
-
-            
             #Do the same for col
             if np.any(puzzleModel.workingClues[line][1] != 0):
                 firstClue = (np.where(puzzleModel.clues[line][1] <= puzzleModel.size)[0][0])
@@ -275,12 +270,58 @@ class puzzleSolver:
                 #same again for the last clue
                 if np.any((puzzleModel.grid[:, line])[puzzleModel.size - puzzleModel.workingClues[line][1][-1]:] == "corr"):
                     self.fillCells(self, puzzleModel, puzzleModel.workingClues[line][1][-1] - (puzzleModel.size - np.where(puzzleModel.grid[:, line] == "corr")[0][-1]), line, puzzleModel.size - puzzleModel.workingClues[line][1][-1], False, True)
-             
                 #if the cell at the clue value is filled, then the edge cell can be marked
                 if puzzleModel.grid[:, line][puzzleModel.workingClues[line][1][firstClue]] == "corr":
                     self.fillCells(self, puzzleModel, 1, line, 0, False, False)
                 if puzzleModel.grid[:, line][puzzleModel.size - puzzleModel.workingClues[line][1][-1] - 1] == "corr":
                     self.fillCells(self, puzzleModel, 1, line, puzzleModel.size - 1, False, False)
+
+        print("where the largest clue in a line is fulfilled")
+        input()
+        #get highest clue in the line
+        #check for adj correct cells
+        #if they are equal to the highest clue, mark a cell either side.
+
+        #for each row
+        for y in range(puzzleModel.size):
+            #again, skip any all 0 line
+            if np.any(puzzleModel.workingClues[y][0] != 0):
+                #find the highest clue
+                highClue = np.amax(puzzleModel.workingClues[y][0])
+                #find the highest number of correct adjactent cells
+                highest = 0
+                curr = 0
+                start = 0
+                for x in range(puzzleModel.size):
+                    if puzzleModel.grid[y][x] == "corr":
+                        if curr == 0:
+                            start = x
+                        curr += 1
+                    if curr >= highest:
+                        highest = curr
+                if highClue == highest:
+                    self.fillCells(self, puzzleModel, 1, start - 1, y, True, False)
+                    self.fillCells(self, puzzleModel, 1, start + highest, y, True, False)
+        #for each col
+        for x in range(puzzleModel.size):
+            #skip all 0 lines
+            if np.any(puzzleModel.workingClues[x][1] != 0):
+                #find the highest clue
+                highClue = np.amax(puzzleModel.workingClues[x][1])
+                #find the highest number of correct adjacent cells
+                highest = 0
+                curr = 0
+                start = 0
+                for y in range(puzzleModel.size):
+                    if puzzleModel.grid[y][x] == "corr":
+                        if curr == 0:
+                            start = y
+                        curr += 1
+                    if curr >= highest:
+                        highest = curr
+                if highClue == highest:
+                    self.fillCells(self, puzzleModel, 1, x, start - 1, False, False)
+                    self.fillCells(self, puzzleModel, 1, x, start + highest, False, False)
 
     def phaseThree(self, puzzleModel):
         print("Phase Three")
@@ -433,8 +474,8 @@ class puzzleSolver:
         self.fillCells(self, puzzleModel, 1, emptyCells[0][selection], emptyCells[1][selection], False, True)
     
     def solve(self, puzzleModel):
-        self.phaseOne(self, puzzleModel)
-        self.phaseTwo(self, puzzleModel)
+        #self.phaseOne(self, puzzleModel)
+        #self.phaseTwo(self, puzzleModel)
         #self.phaseThree(self, puzzleModel)
         #self.phaseFour(self, puzzleModel)
 
