@@ -72,4 +72,12 @@ public class CellBehaviour : MonoBehaviour
             }
         }
     }
+
+    public void ResetCell()
+    {
+        filled = false;
+        marked = false;
+
+        spriteRenderer.sprite = emptySprite;
+    }
 }

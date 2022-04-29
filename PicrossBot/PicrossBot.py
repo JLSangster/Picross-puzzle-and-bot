@@ -35,7 +35,7 @@ class puzzleModel:
         except IndexError:
             sys.exit("Error - no picross puzzle detected. Ensure that the picross puzzle is visible on the current screen.")
         except:
-            sys.Exit("Unknown Error occurred")
+            sys.exit("Unknown Error occurred")
 
         #locate the toggle
         self.togLoc = pyautogui.locateCenterOnScreen('toggle.png')
@@ -71,7 +71,7 @@ class puzzleModel:
                 
                 #check for each of the clues
                 for i in range(self.size + 1):
-                    if pyautogui.locateOnScreen((str(i) + ".png"),region = reg, confidence = 0.85) != None:
+                    if pyautogui.locateOnScreen((str(i) + ".png"),region = reg, confidence = 0.87) != None:
                         self.clues[r,1,abs(clue-maxClue)] = i
                         break
 
@@ -364,12 +364,47 @@ class puzzleSolver:
             if puzzleModel.workingClues[x][1][puzzleModel.workingClues[x][1] > 0].size > 0:
                 smallClue = np.min(puzzleModel.workingClues[x][1][puzzleModel.workingClues[x][1] > 0])
                 largeClue = np.max(puzzleModel.workingClues[x][1][puzzleModel.workingClues[x][1] > 0])
-                print('{0}, {1}', smallClue, largeClue)
+                print("{0}, {1}", smallClue, largeClue)
+
+            #for each of the gaps
+            for i in range(len(gapSize)):
+                #determine if the gap ends with a filled cell - this is important for if a clue might be part complete
+                if gapSize[0] > 0:
+                    fillable = True
+                        
+                    #that doesn't work - just change it to check for -1 or gridsize
+                    print(gapLoc[i]-1)
+                    print(gapLoc[i] + gapSize[i])
+                    print(gapLoc[i] + gapSize[i] == puzzleModel.size)
+
+                    #if (gapLoc[i] - 1 == -1) or gapLoc[i] + gapSize[i] == puzzleModel.size):
+                    #    print("edge")
+                    #else:
+                    #    if puzzleModel.grid[gapLoc[i] - 1][x] == "corr" or puzzleModel.grid[gapLoc[i] + gapSize[i]][x] == "corr":
+                    #        fillable = False
+                    
+                    if (gapLoc[i] -1 > -1):
+                        if (puzzleModel.grid[gapLoc[i] - 1][x] == "corr"):
+                            fillable = False #(served by a different case)
+
+                    if (gapLoc[i] + gapSize[i] < puzzleModel.size):                  
+                        if (puzzleModel.grid[gapLoc[i] + gapSize[i]][x] == "corr"):
+                            fillable = False #(served by a different case)
+
+                    if fillable:
+                        print("fillable")
+                        #A gap bordered by anything other than correct cells can be treated as if it were an empty row
+                        #look at the clues
+                        #if there is only one clue,
+                        #if the clue is smaller than the size 
+
 
             #Where the largest clue is equal to the largest unique gap, it can be filled
-            if largeClue == np.max(gapSize):
-                print(np.where(gapSize == largeClue))
-                self.fillCells(self, puzzleModel, largeClue, x, gapLoc[np.where(gapSize == largeClue)[0][0]], False, True)
+            if (largeClue == np.max(gapSize)) & largeClue > 0:
+                print("large match")
+                print(gapLoc[np.where(gapSize == largeClue)[0][0]])
+            #    print(np.where(gapSize == largeClue))
+            #    self.fillCells(self, puzzleModel, largeClue, x, gapLoc[np.where(gapSize == largeClue)[0][0]], False, True)
 
 
             #gapCount = len(np.where(puzzleModel.workingClues[x][1] > 0)[0]) - 1
@@ -499,9 +534,10 @@ class puzzleSolver:
         self.fillCells(self, puzzleModel, 1, emptyCells[0][selection], emptyCells[1][selection], False, True)
     
     def solve(self, puzzleModel):
-        #self.phaseOne(self, puzzleModel)
-        #self.phaseTwo(self, puzzleModel)
-        #self.phaseThree(self, puzzleModel)
+        self.phaseOne(self, puzzleModel)
+        self.phaseTwo(self, puzzleModel)
+        self.phaseTwo(self, puzzleModel)
+        self.phaseThree(self, puzzleModel)
         #self.phaseFour(self, puzzleModel)
 
 def main():

@@ -7,8 +7,12 @@ using TMPro;
 public class GridManager : MonoBehaviour
 {
     //Grid dimensions
+    public int size = 0;
     private int rows;
     private int cols;
+
+    //debug settings
+    public bool livesOn;
 
     public UIManager uIManager;
     public GameObject fillToggle;
@@ -40,7 +44,7 @@ public class GridManager : MonoBehaviour
     private float lossTot;
 
     // Start is called before the first frame update
-    void Start() {    }
+    void Start() { livesOn = true; }
 
     // Update is called once per frame
     void Update()
@@ -50,6 +54,11 @@ public class GridManager : MonoBehaviour
             timer += Time.deltaTime;
             timerRead.text = timer.ToString();
         }
+    }
+
+    public void ToggleLives()
+    {
+        livesOn = !livesOn;
     }
 
     public void NewPuzzle()
@@ -92,10 +101,13 @@ public class GridManager : MonoBehaviour
 
     public void AddMistake()
     {
-        mistakes += 1;
-        Destroy(mistakeSprites[mistakes - 1]);
-        //if the mistakes are equal to the max mistakes, puzzle failed
-        if (mistakes >= maxMistakes) { PuzzleLost(); }
+        if (livesOn == true)
+        {
+            mistakes += 1;
+            Destroy(mistakeSprites[mistakes - 1]);
+            //if the mistakes are equal to the max mistakes, puzzle failed
+            if (mistakes >= maxMistakes) { PuzzleLost(); }
+        }
     }
 
     //puzzle complete
@@ -120,6 +132,39 @@ public class GridManager : MonoBehaviour
         //calc the new average time to fail puzzle
         lossTot += timer;
         attf = lossTot / losses;
+    }
+
+    public void ResetPuzzle()
+    {
+        //keep the same puzzle, but reset the lives to the original number and set every cell back to empty
+
+        GameObject mistakeRef = (GameObject)Instantiate(Resources.Load("MistakeMarker"));
+        float posX, posY;
+
+        //reset the lives
+        for (int i = 0; i <= mistakes; i++)
+        {
+            GameObject mistakeMarker = (GameObject)Instantiate(mistakeRef, transform);
+
+            posX = cols;
+            posY = i + 1.3f;
+
+            mistakeMarker.transform.position = new Vector3(posX, posY, 0);
+            mistakeSprites[i] = mistakeMarker;
+        }
+
+        Destroy(mistakeRef);
+
+        mistakes = 0;
+
+        //set every cell back to empty
+        foreach (Transform child in transform)
+        {
+            if (child.TryGetComponent(out CellBehaviour cellBehaviour))
+            {
+                cellBehaviour.ResetCell();
+            }
+        }
     }
 
     //Generate the grid of given dimensions
@@ -214,8 +259,16 @@ public class GridManager : MonoBehaviour
 
     void GenPuzzle()
     {
-        //randomize the size of the puzzle
-        rows = 5 * Random.Range(1, 3);
+        if (size == 0)
+        {
+                //randomize the size of the puzzle
+                rows = 5 * Random.Range(1, 3);
+        }
+        else
+        {
+            rows = size;
+        }
+        //rows = size;
         cols = rows;
         maxMistakes = rows / 2;
         clueNum = rows / 2 + 1;

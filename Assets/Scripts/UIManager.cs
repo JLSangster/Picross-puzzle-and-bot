@@ -18,9 +18,7 @@ public class ResultsRecord
 
 public class UIManager : MonoBehaviour
 {
-    public bool showMenu = false;
     public bool showPuzWin = false;
-    public bool showFin = false;
     public bool showPuzLoss = false;
     public GridManager gridManager;
 
@@ -28,8 +26,14 @@ public class UIManager : MonoBehaviour
     private bool resultsSaved = false;
     private bool showSmall = false;
     private bool showSave = false;
+    private bool showErr = false;
+    private bool showMenu = false;
     private bool showDebug = false;
+    private bool showFin = false;
     private string message = "";
+    private bool livesOn = true;
+    private string livesTxt = "Lives on";
+    private string sizeTxt = "Random";
 
     // Start is called before the first frame update
     void Start()
@@ -40,7 +44,8 @@ public class UIManager : MonoBehaviour
     // Update is called once per frame
     void Update() 
     {
-        if (Input.GetKey("escape")) { showSmall = true; }
+        if (Input.GetKey(KeyCode.Escape)) { showSmall = true; }
+        if (Input.GetKey(KeyCode.RightShift)) { showDebug = true; }
     }
 
     void OnGUI()
@@ -62,6 +67,57 @@ public class UIManager : MonoBehaviour
                 showMenu = false;
                 gridManager.NewPuzzle();
             }
+        } 
+
+        if (showDebug)
+        {
+            GUI.Box(winRect, "Debug");
+            
+            //skip the current puzzle
+            if (GUI.Button(new Rect(smallWin.x + (smallWin.width / 4), smallWin.y + (smallWin.height / 8), 70, 20), "Skip Puzzle")) { gridManager.NewPuzzle(); }
+
+            //reset the current puzzle
+            if (GUI.Button(new Rect(smallWin.x + (3 * smallWin.width / 4), smallWin.y + (smallWin.height / 8), 70, 20), "Reset Puzzle")) { gridManager.ResetPuzzle(); }
+
+            //toggle lives
+            if (GUI.Button(new Rect(smallWin.x + (smallWin.width / 4), smallWin.y + (smallWin.height / 3), 70, 20), livesTxt))
+            {
+                gridManager.ToggleLives();
+                switch(livesTxt)
+                {
+                    case ("Lives on"):
+                        livesTxt = "Lives off";
+                        break;
+                    case ("Lives off"):
+                        livesTxt = "Lives on";
+                        break;
+                }
+            }
+
+            //Chose puzzle size
+            if (GUI.Button(new Rect(smallWin.x + (3 * smallWin.width / 4), smallWin.y + (smallWin.height / 3), 70, 20), sizeTxt))
+            {
+                switch(sizeTxt)
+                {
+                    case ("Random"):
+                        gridManager.size = 5;
+                        gridManager.NewPuzzle();
+                        sizeTxt = "5 x 5";
+                        break;
+                    case ("5 x 5"):
+                        gridManager.size = 10;
+                        gridManager.NewPuzzle();
+                        sizeTxt = "10 x 10";
+                        break;
+                    case ("10 x 10"):
+                        gridManager.size = 0;
+                        gridManager.NewPuzzle();
+                        sizeTxt = "Random";
+                        break;
+                }
+            }
+
+            if (GUI.Button(new Rect(smallWin.x + smallWin.width - 30, smallWin.y + smallWin.height - 5, 70, 20), "Close")) { showDebug = false; }
         } 
 
         //Content of the win screen
@@ -201,10 +257,10 @@ public class UIManager : MonoBehaviour
             if (GUI.Button(new Rect(smallWin.x + (smallWin.width / 2), smallWin.y + smallWin.height - 30, 70, 20), "Ok")) { showSave = false; }
         }
 
-        if (showDebug)
+        if (showErr)
         {
             GUI.Box(smallWin, message);
-            if (GUI.Button(new Rect(smallWin.x + (smallWin.width / 2), smallWin.y + smallWin.height - 30, 70, 20), "Ok")) { showSave = false; }
+            if (GUI.Button(new Rect(smallWin.x + (smallWin.width / 2), smallWin.y + smallWin.height - 30, 70, 20), "Ok")) { showErr = false; }
         }
     }
 }
