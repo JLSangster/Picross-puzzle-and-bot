@@ -156,6 +156,7 @@ public class GridManager : MonoBehaviour
         Destroy(mistakeRef);
 
         mistakes = 0;
+        correctCount = 0;
 
         //set every cell back to empty
         foreach (Transform child in transform)

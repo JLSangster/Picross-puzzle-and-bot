@@ -31,7 +31,6 @@ public class UIManager : MonoBehaviour
     private bool showDebug = false;
     private bool showFin = false;
     private string message = "";
-    private bool livesOn = true;
     private string livesTxt = "Lives on";
     private string sizeTxt = "Random";
 
