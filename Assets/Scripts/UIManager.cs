@@ -29,6 +29,7 @@ public class UIManager : MonoBehaviour
     private bool showErr = false;
     private bool showMenu = false;
     private bool showDebug = false;
+    private bool showCustom = false;
     private bool showFin = false;
     private string message = "";
     private string livesTxt = "Lives on";
@@ -116,8 +117,58 @@ public class UIManager : MonoBehaviour
                 }
             }
 
+            if (GUI.Button(new Rect(smallWin.x + (smallWin.width / 4), smallWin.y + (5 * smallWin.height / 8), 70, 20), "Custom Solution")) 
+            {
+                showCustom = true;
+                showDebug = false;
+                gridManager.SetPuzzle(5);
+            }
+
             if (GUI.Button(new Rect(smallWin.x + smallWin.width - 30, smallWin.y + smallWin.height - 5, 70, 20), "Close")) { showDebug = false; }
-        } 
+        }
+
+        //Screen for creating a custom solution
+        if (showCustom)
+        {
+            Rect sideWin = new Rect((Screen.width - Screen.width * (windowRatio / 4)) / 8, (Screen.height - Screen.height * (windowRatio / 2)) / 2, winRect.width / 4, (2 * (winRect.height / 3)));
+            GUI.Box(sideWin, "Custom puzzle");
+
+            if (sizeTxt == "Random") { sizeTxt = "5 x 5"; }
+
+            //toggle for 5x5 / 10x10
+            if (GUI.Button(new Rect(sideWin.x + (sideWin.width / 5), sideWin.y + (sideWin.height / 4), 70, 20), sizeTxt))
+            {
+                
+                switch(sizeTxt)
+                {
+                    case ("5 x 5"):
+                        gridManager.size = 10;
+                        gridManager.SetPuzzle(10);
+                        sizeTxt = "10 x 10";
+                        break;
+                    case ("10 x 10"):
+                        gridManager.size = 5;
+                        gridManager.SetPuzzle(5);
+                        sizeTxt = "5 x 5";
+                        break;
+                }
+            }
+
+            //button to init that puzzle, the corrects are put into a matrix that is passed through to the grid manager...
+            //and that is how the cells are spawned and the clues are calculated
+            if (GUI.Button(new Rect(sideWin.x + (sideWin.width / 5), sideWin.y + (sideWin.height / 2), 70, 20), "Set")) 
+            { 
+                gridManager.NewPuzzle(); 
+                showCustom = false;
+            }
+
+            if (GUI.Button(new Rect(sideWin.x + (sideWin.width / 5), sideWin.y + ( 3 * sideWin.height / 4), 70, 20), "Close")) 
+            { 
+                showCustom = false;
+                gridManager.puzzleGen = false;
+                gridManager.NewPuzzle();
+            }
+        }
 
         //Content of the win screen
         if (showPuzWin)

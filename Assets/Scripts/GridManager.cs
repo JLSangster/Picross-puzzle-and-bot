@@ -27,6 +27,7 @@ public class GridManager : MonoBehaviour
     private int maxMistakes; //max number of 'lives'
     private int mistakes; //current mistakes made
 
+    public bool puzzleGen; //specifies if the puzzle has already been generated
     private bool[,] solMat; //Solution matrix
     private int[,,] clueTileGrid; //array of clues
     private GameObject[] mistakeSprites; //Array for mistake markers
@@ -44,7 +45,11 @@ public class GridManager : MonoBehaviour
     private float lossTot;
 
     // Start is called before the first frame update
-    void Start() { livesOn = true; }
+    void Start() 
+    { 
+        livesOn = true;
+        puzzleGen = false;
+    }
 
     // Update is called once per frame
     void Update()
@@ -63,6 +68,7 @@ public class GridManager : MonoBehaviour
 
     public void NewPuzzle()
     {
+        print(puzzleGen);
         //Destroy all children from the previous puzzle
         foreach (Transform child in transform)
         {
@@ -76,9 +82,15 @@ public class GridManager : MonoBehaviour
         mistakes = 0;
 
         //generate and display the puzzle
-        GenPuzzle();
+        if (!puzzleGen)
+        {
+            GenPuzzle();
+        }
+        CalcClues();
         GenGrid();
-    }
+
+        puzzleGen = false;
+    }    
 
     //fill get for interacting with the cells
     public bool GetFill()
@@ -258,39 +270,60 @@ public class GridManager : MonoBehaviour
         timerActive = true;
     }
 
-    void GenPuzzle()
-    {
-        if (size == 0)
-        {
-                //randomize the size of the puzzle
-                rows = 5 * Random.Range(1, 3);
-        }
-        else
-        {
-            rows = size;
-        }
-        //rows = size;
-        cols = rows;
-        maxMistakes = rows / 2;
-        clueNum = rows / 2 + 1;
-        mistakeSprites = new GameObject[maxMistakes];
 
-        //init the mat
+
+    public void SetPuzzle(int puzSize)
+    {
+        //Sets the puzzle to a specific solution
+        
+        puzzleGen = true;
+        foreach (Transform child in transform)
+        {
+            Destroy(child.gameObject);
+        }
+
+        //set the puzzle size to the size passed through from the ui
+        size = puzSize;
+        rows = size;
+        cols = rows;
         solMat = new bool[rows, cols];
 
-        //populate the mat
-        for (int r = 0; r < rows; r++)
+        //generate a grid of the other cells of that size
+        GameObject cellSelRef = (GameObject)Instantiate(Resources.Load("CellSelector"));
+
+        float posX, posY;
+        //grid is generated from the bottom up
+        for (int r = rows; r > 0; r--)
         {
-            for (int c = 0; c < cols; c++)
+            for (int c = cols; c > 0; c--)
             {
-                solMat[r, c] = Random.Range(0, 2) == 0;
-                if (solMat[r, c] == true)
-                {
-                    completeCount += 1;
-                }
+                //instantiate cell
+                GameObject cell = (GameObject)Instantiate(cellSelRef, transform);
+                CellSelectorBehaviour cellSelectorBehaviour = cell.GetComponent<CellSelectorBehaviour>();
+                cellSelectorBehaviour.correct = false;
+                cellSelectorBehaviour.gridManager = this;
+                cellSelectorBehaviour.r = size - r;
+                cellSelectorBehaviour.c = c - 1;
+                solMat[r - 1, c - 1] = false;
+
+                posX = c - (cols / 2);
+                posY = r - (rows / 2);
+
+                cell.transform.position = new Vector3(posX, posY, 0);
             }
         }
 
+        Destroy(cellSelRef);
+    }
+
+    public void SetSol(int r, int c, bool correct)
+    {
+        print("updating solution");
+        solMat[r, c] = correct;
+    }
+
+    void CalcClues()
+    {
         //Calculating the clues
         clueTileGrid = new int[rows, 2, clueNum];
 
@@ -352,6 +385,41 @@ public class GridManager : MonoBehaviour
                         //move to the next tile
                         tile++;
                     }
+                }
+            }
+        }
+
+    }
+
+    void GenPuzzle()
+    {
+        if (size == 0)
+        {
+                //randomize the size of the puzzle
+                rows = 5 * Random.Range(1, 3);
+        }
+        else
+        {
+            rows = size;
+        }
+        //rows = size;
+        cols = rows;
+        maxMistakes = rows / 2;
+        clueNum = rows / 2 + 1;
+        mistakeSprites = new GameObject[maxMistakes];
+
+        //init the mat
+        solMat = new bool[rows, cols];
+
+        //populate the mat
+        for (int r = 0; r < rows; r++)
+        {
+            for (int c = 0; c < cols; c++)
+            {
+                solMat[r, c] = Random.Range(0, 2) == 0;
+                if (solMat[r, c] == true)
+                {
+                    completeCount += 1;
                 }
             }
         }

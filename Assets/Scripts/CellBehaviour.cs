@@ -3,19 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CellBehaviour : MonoBehaviour
+public class CellBehaviour : CellSelectorBehaviour
 {
-    //flag for if it should be right or wrong in the solution
-    public bool correct;
-
     //vars for sprite changing
-    public SpriteRenderer spriteRenderer;
-    public Sprite emptySprite;
-    public Sprite filledSprite;
     public Sprite markedSprite;
     public Sprite wrongSprite;
-
-    public GridManager gridManager;
 
     //flags for if the cell is filled or marked
     private bool marked = false;

@@ -369,19 +369,13 @@ class puzzleSolver:
             #for each of the gaps
             for i in range(len(gapSize)):
                 #determine if the gap ends with a filled cell - this is important for if a clue might be part complete
-                if gapSize[0] > 0:
+                if gapSize[i] > 0:
                     fillable = True
                         
                     #that doesn't work - just change it to check for -1 or gridsize
-                    print(gapLoc[i]-1)
-                    print(gapLoc[i] + gapSize[i])
-                    print(gapLoc[i] + gapSize[i] == puzzleModel.size)
-
-                    #if (gapLoc[i] - 1 == -1) or gapLoc[i] + gapSize[i] == puzzleModel.size):
-                    #    print("edge")
-                    #else:
-                    #    if puzzleModel.grid[gapLoc[i] - 1][x] == "corr" or puzzleModel.grid[gapLoc[i] + gapSize[i]][x] == "corr":
-                    #        fillable = False
+                    #print(gapLoc[i]-1)
+                    #print(gapLoc[i] + gapSize[i])
+                    #print(gapLoc[i] + gapSize[i] == puzzleModel.size)
                     
                     if (gapLoc[i] -1 > -1):
                         if (puzzleModel.grid[gapLoc[i] - 1][x] == "corr"):
@@ -391,20 +385,23 @@ class puzzleSolver:
                         if (puzzleModel.grid[gapLoc[i] + gapSize[i]][x] == "corr"):
                             fillable = False #(served by a different case)
 
-                    if fillable:
+                    if fillable: #temporary status to manage where there isn't a partial fill
                         print("fillable")
                         #A gap bordered by anything other than correct cells can be treated as if it were an empty row
                         #look at the clues
                         #if there is only one clue,
                         #if the clue is smaller than the size 
+                        if (largeClue == gapSize[i]) & largeClue > 0:
+                            print("large match")
+                            print(gapLoc[i])
 
 
             #Where the largest clue is equal to the largest unique gap, it can be filled
-            if (largeClue == np.max(gapSize)) & largeClue > 0:
-                print("large match")
-                print(gapLoc[np.where(gapSize == largeClue)[0][0]])
-            #    print(np.where(gapSize == largeClue))
-            #    self.fillCells(self, puzzleModel, largeClue, x, gapLoc[np.where(gapSize == largeClue)[0][0]], False, True)
+            #if (largeClue == np.max(gapSize)) & largeClue > 0:
+                #print("large match")
+                #print(gapLoc[np.where(gapSize == largeClue)[0][0]])
+                #print(np.where(gapSize == largeClue))
+                #self.fillCells(self, puzzleModel, largeClue, x, gapLoc[np.where(gapSize == largeClue)[0][0]], False, True)
 
 
             #gapCount = len(np.where(puzzleModel.workingClues[x][1] > 0)[0]) - 1
