@@ -68,7 +68,6 @@ public class GridManager : MonoBehaviour
 
     public void NewPuzzle()
     {
-        print(puzzleGen);
         //Destroy all children from the previous puzzle
         foreach (Transform child in transform)
         {
@@ -77,13 +76,13 @@ public class GridManager : MonoBehaviour
 
         //init puzzle variables
         fill = (fillToggle.GetComponent<Toggle>().isOn);
-        completeCount = 0;
         correctCount = 0;
         mistakes = 0;
 
         //generate and display the puzzle
         if (!puzzleGen)
         {
+            completeCount = 0;
             GenPuzzle();
         }
         CalcClues();
@@ -287,6 +286,7 @@ public class GridManager : MonoBehaviour
         rows = size;
         cols = rows;
         solMat = new bool[rows, cols];
+        completeCount = 0;
 
         //generate a grid of the other cells of that size
         GameObject cellSelRef = (GameObject)Instantiate(Resources.Load("CellSelector"));
@@ -302,7 +302,7 @@ public class GridManager : MonoBehaviour
                 CellSelectorBehaviour cellSelectorBehaviour = cell.GetComponent<CellSelectorBehaviour>();
                 cellSelectorBehaviour.correct = false;
                 cellSelectorBehaviour.gridManager = this;
-                cellSelectorBehaviour.r = size - r;
+                cellSelectorBehaviour.r = r - 1;
                 cellSelectorBehaviour.c = c - 1;
                 solMat[r - 1, c - 1] = false;
 
@@ -318,8 +318,9 @@ public class GridManager : MonoBehaviour
 
     public void SetSol(int r, int c, bool correct)
     {
-        print("updating solution");
         solMat[r, c] = correct;
+        if (correct) { completeCount += 1; }
+        else { completeCount -= 1; }
     }
 
     void CalcClues()

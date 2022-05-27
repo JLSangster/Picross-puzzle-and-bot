@@ -28,7 +28,6 @@ public class CellSelectorBehaviour : MonoBehaviour
         //When the cell is clicked, it toggles if it is correct, and fills or clears the cell.
         if (correct)
         {
-            print("correct");
             spriteRenderer.sprite = emptySprite;
             correct = false;
             gridManager.SetSol(r, c, correct);
@@ -38,7 +37,6 @@ public class CellSelectorBehaviour : MonoBehaviour
             spriteRenderer.sprite = filledSprite;
             correct = true;
             gridManager.SetSol(r, c, correct);
-            print("updated");
         }
     }
 }

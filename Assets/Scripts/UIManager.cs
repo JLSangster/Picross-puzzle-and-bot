@@ -34,6 +34,7 @@ public class UIManager : MonoBehaviour
     private string message = "";
     private string livesTxt = "Lives on";
     private string sizeTxt = "Random";
+    private string sizeSetTxt = "5 x 5";
 
     // Start is called before the first frame update
     void Start()
@@ -45,7 +46,7 @@ public class UIManager : MonoBehaviour
     void Update() 
     {
         if (Input.GetKey(KeyCode.Escape)) { showSmall = true; }
-        if (Input.GetKey(KeyCode.RightShift)) { showDebug = true; }
+        if (Input.GetKey(KeyCode.D)) { showDebug = true; }
     }
 
     void OnGUI()
@@ -133,23 +134,21 @@ public class UIManager : MonoBehaviour
             Rect sideWin = new Rect((Screen.width - Screen.width * (windowRatio / 4)) / 8, (Screen.height - Screen.height * (windowRatio / 2)) / 2, winRect.width / 4, (2 * (winRect.height / 3)));
             GUI.Box(sideWin, "Custom puzzle");
 
-            if (sizeTxt == "Random") { sizeTxt = "5 x 5"; }
-
             //toggle for 5x5 / 10x10
-            if (GUI.Button(new Rect(sideWin.x + (sideWin.width / 5), sideWin.y + (sideWin.height / 4), 70, 20), sizeTxt))
+            if (GUI.Button(new Rect(sideWin.x + (sideWin.width / 5), sideWin.y + (sideWin.height / 4), 70, 20), sizeSetTxt))
             {
                 
-                switch(sizeTxt)
+                switch(sizeSetTxt)
                 {
                     case ("5 x 5"):
                         gridManager.size = 10;
                         gridManager.SetPuzzle(10);
-                        sizeTxt = "10 x 10";
+                        sizeSetTxt = "10 x 10";
                         break;
                     case ("10 x 10"):
                         gridManager.size = 5;
                         gridManager.SetPuzzle(5);
-                        sizeTxt = "5 x 5";
+                        sizeSetTxt = "5 x 5";
                         break;
                 }
             }
@@ -160,6 +159,7 @@ public class UIManager : MonoBehaviour
             { 
                 gridManager.NewPuzzle(); 
                 showCustom = false;
+                sizeSetTxt = "5 x 5";
             }
 
             if (GUI.Button(new Rect(sideWin.x + (sideWin.width / 5), sideWin.y + ( 3 * sideWin.height / 4), 70, 20), "Close")) 
@@ -167,6 +167,7 @@ public class UIManager : MonoBehaviour
                 showCustom = false;
                 gridManager.puzzleGen = false;
                 gridManager.NewPuzzle();
+                sizeSetTxt = "5 x 5";
             }
         }
 
