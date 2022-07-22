@@ -72,16 +72,16 @@ public class UIManager : MonoBehaviour
 
         if (showDebug)
         {
-            GUI.Box(winRect, "Debug");
+            GUI.Box(winRect, "\n Debug");
             
             //skip the current puzzle
-            if (GUI.Button(new Rect(smallWin.x + (smallWin.width / 4), smallWin.y + (smallWin.height / 8), 70, 20), "Skip Puzzle")) { gridManager.NewPuzzle(); }
+            if (GUI.Button(new Rect(winRect.x + (winRect.width / 4), winRect.y + (winRect.height / 8) + 20, winRect.width / 6, winRect.height / 8), "Skip Puzzle")) { gridManager.NewPuzzle(); }
 
             //reset the current puzzle
-            if (GUI.Button(new Rect(smallWin.x + (3 * smallWin.width / 4), smallWin.y + (smallWin.height / 8), 70, 20), "Reset Puzzle")) { gridManager.ResetPuzzle(); }
+            if (GUI.Button(new Rect(winRect.x + (winRect.width / 4), winRect.y + (winRect.height / 4) + 25, winRect.width / 6, winRect.height / 8), "Reset Puzzle")) { gridManager.ResetPuzzle(); }
 
             //toggle lives
-            if (GUI.Button(new Rect(smallWin.x + (smallWin.width / 4), smallWin.y + (smallWin.height / 3), 70, 20), livesTxt))
+            if (GUI.Button(new Rect(winRect.x + (winRect.width / 2), winRect.y + (winRect.height / 8) + 20, winRect.width / 6, winRect.height / 8), livesTxt))
             {
                 gridManager.ToggleLives();
                 switch(livesTxt)
@@ -96,7 +96,7 @@ public class UIManager : MonoBehaviour
             }
 
             //Chose puzzle size
-            if (GUI.Button(new Rect(smallWin.x + (3 * smallWin.width / 4), smallWin.y + (smallWin.height / 3), 70, 20), sizeTxt))
+            if (GUI.Button(new Rect(winRect.x + (winRect.width / 2), winRect.y + (winRect.height / 4) + 25, winRect.width / 6, winRect.height / 8), sizeTxt))
             {
                 switch(sizeTxt)
                 {
@@ -118,14 +118,14 @@ public class UIManager : MonoBehaviour
                 }
             }
 
-            if (GUI.Button(new Rect(smallWin.x + (smallWin.width / 4), smallWin.y + (5 * smallWin.height / 8), 70, 20), "Custom Solution")) 
+            if (GUI.Button(new Rect(winRect.x + (winRect.width / 2), winRect.y + (winRect.height / 2) + 30, winRect.width / 6, winRect.height / 8), "Custom Solution")) 
             {
                 showCustom = true;
                 showDebug = false;
                 gridManager.SetPuzzle(5);
             }
 
-            if (GUI.Button(new Rect(smallWin.x + smallWin.width - 30, smallWin.y + smallWin.height - 5, 70, 20), "Close")) { showDebug = false; }
+            if (GUI.Button(new Rect(winRect.x + winRect.width - (winRect.width / 6) - 20, winRect.y + winRect.height - winRect.height / 8 - 40, winRect.width / 6, winRect.height / 8), "Close")) { showDebug = false; }
         }
 
         //Screen for creating a custom solution
@@ -135,7 +135,7 @@ public class UIManager : MonoBehaviour
             GUI.Box(sideWin, "Custom puzzle");
 
             //toggle for 5x5 / 10x10
-            if (GUI.Button(new Rect(sideWin.x + (sideWin.width / 5), sideWin.y + (sideWin.height / 4), 70, 20), sizeSetTxt))
+            if (GUI.Button(new Rect(sideWin.x + (sideWin.width / 5), sideWin.y + (sideWin.height / 4), winRect.width / 6, winRect.height / 8), sizeSetTxt))
             {
                 
                 switch(sizeSetTxt)
@@ -155,14 +155,14 @@ public class UIManager : MonoBehaviour
 
             //button to init that puzzle, the corrects are put into a matrix that is passed through to the grid manager...
             //and that is how the cells are spawned and the clues are calculated
-            if (GUI.Button(new Rect(sideWin.x + (sideWin.width / 5), sideWin.y + (sideWin.height / 2), 70, 20), "Set")) 
+            if (GUI.Button(new Rect(sideWin.x + (sideWin.width / 5), sideWin.y + (sideWin.height / 2), winRect.width / 6, winRect.height / 8), "Set")) 
             { 
                 gridManager.NewPuzzle(); 
                 showCustom = false;
                 sizeSetTxt = "5 x 5";
             }
 
-            if (GUI.Button(new Rect(sideWin.x + (sideWin.width / 5), sideWin.y + ( 3 * sideWin.height / 4), 70, 20), "Close")) 
+            if (GUI.Button(new Rect(sideWin.x + (sideWin.width / 5), sideWin.y + ( 3 * sideWin.height / 4), winRect.width / 6, winRect.height / 8), "Close")) 
             { 
                 showCustom = false;
                 gridManager.puzzleGen = false;
@@ -174,10 +174,10 @@ public class UIManager : MonoBehaviour
         //Content of the win screen
         if (showPuzWin)
         {
-            GUI.Box(winRect, "Puzzle Complete! \n" + "Time: " + gridManager.timer.ToString());
+            GUI.Box(smallWin, "\n Puzzle Complete! \n" + "Time: " + gridManager.timer.ToString());
 
             //Next puzzle button
-            if (GUI.Button(new Rect(winRect.x + winRect.width - 170, winRect.y + winRect.height - 60, 150, 40), "Next Puzzle"))
+            if (GUI.Button(new Rect(smallWin.x + smallWin.width - (winRect.width / 6) - 10, smallWin.y + smallWin.height - winRect.height / 10 - 30, winRect.width / 6, winRect.height / 10), "Next Puzzle"))
             {
                 showPuzWin = false;
                 gridManager.NewPuzzle();
@@ -185,7 +185,7 @@ public class UIManager : MonoBehaviour
             }
 
             //Results button
-            if (GUI.Button(new Rect(winRect.x + 20, winRect.y + winRect.height - 60, 150, 40), "Results"))
+            if (GUI.Button(new Rect(smallWin.x + 10, smallWin.y + smallWin.height - winRect.height / 10 - 30, winRect.width / 6, winRect.height / 10), "Results"))
             {
                 //Close this screen, open final screen
                 showPuzWin = false;
@@ -196,10 +196,10 @@ public class UIManager : MonoBehaviour
         //Content of the loss screen
         if (showPuzLoss)
         {
-            GUI.Box(winRect, "Puzzle Failed.");
+            GUI.Box(smallWin, "\n Puzzle Failed.");
 
             //Next puzzle button
-            if (GUI.Button(new Rect(winRect.x + winRect.width - 170, winRect.y + winRect.height - 60, 150, 40), "Next Puzzle"))
+            if (GUI.Button(new Rect(smallWin.x + smallWin.width - (winRect.width / 6) - 10, smallWin.y + smallWin.height - winRect.height / 10 - 30, winRect.width / 6, winRect.height / 10), "Next Puzzle"))
             {
                 showPuzLoss = false;
                 gridManager.NewPuzzle();
@@ -207,7 +207,7 @@ public class UIManager : MonoBehaviour
             }
 
             //Results button
-            if (GUI.Button(new Rect(winRect.x + 20, winRect.y + winRect.height - 60, 150, 40), "Results"))
+            if (GUI.Button(new Rect(smallWin.x + 10, smallWin.y + smallWin.height - winRect.height / 10 - 30, winRect.width / 6, winRect.height / 10), "Results"))
             {
                 showPuzLoss = false;
                 showFin = true;
@@ -217,9 +217,9 @@ public class UIManager : MonoBehaviour
         //Final window, lists number of wins, losses and average time to both.
         if (showFin)
         {
-            GUI.Box(winRect, "Results \n" + "Puzzles completed: " + gridManager.wins.ToString() + "\nPuzzles failed: " + gridManager.losses.ToString() + " \nAverage Time: " + gridManager.timeAvg + " \nATTF: " + gridManager.attf);
+            GUI.Box(winRect, "\n Results \n \n" + "Puzzles completed: " + gridManager.wins.ToString() + "\nPuzzles failed: " + gridManager.losses.ToString() + " \nAverage Time: " + gridManager.timeAvg + " \nATTF: " + gridManager.attf);
 
-            if (GUI.Button(new Rect(winRect.x + winRect.width - 170, winRect.y + winRect.height - 60, 150, 40), "Save"))
+            if (GUI.Button(new Rect(winRect.x + 20, winRect.y + winRect.height - winRect.height / 8 - 40, winRect.width / 6, winRect.height / 8), "Save"))
             {
                 //Create the data record
                 var results = new List<ResultsRecord>
@@ -264,7 +264,7 @@ public class UIManager : MonoBehaviour
                     showDebug = true;
                 }
             }
-            if (GUI.Button(new Rect(winRect.x + 20, winRect.y + winRect.height - 60, 150, 40), "Quit"))
+            if (GUI.Button(new Rect(winRect.x + winRect.width - (winRect.width / 6) - 20, winRect.y + winRect.height - winRect.height / 8 - 40, winRect.width / 6, winRect.height / 8), "Quit"))
             {
                 //resultsSaved is always false until saving is implemented
                 if (!resultsSaved) { showSmall = true; }
@@ -284,8 +284,8 @@ public class UIManager : MonoBehaviour
         //Show small is for confirming quitting the application without saving results.
         if (showSmall)
         {
-            GUI.Box(smallWin, "Results have not been saved, Quit anyway?");
-            if (GUI.Button(new Rect(smallWin.x + 10, smallWin.y + smallWin.height - 30, 70, 20), "Yes"))
+            GUI.Box(smallWin, "\n Results have not been saved, Quit anyway?");
+            if (GUI.Button(new Rect(smallWin.x + 10, smallWin.y + smallWin.height - winRect.height / 10 - 30, winRect.width / 6, winRect.height / 10), "Yes"))
             {
                 //For debugging/developing purposes, check if how its running and close that
 #if UNITY_EDITOR
@@ -295,7 +295,7 @@ public class UIManager : MonoBehaviour
                 Application.Quit();
 #endif
             }
-            if (GUI.Button(new Rect(smallWin.x + smallWin.width - 80, smallWin.y + smallWin.height - 30, 70, 20), "No"))
+            if (GUI.Button(new Rect(smallWin.x + smallWin.width - (winRect.width / 6) - 10 , smallWin.y + smallWin.height - winRect.height / 10 - 30, winRect.width / 6, winRect.height / 10), "No"))
             {
                 showSmall = false;
             }
@@ -304,14 +304,14 @@ public class UIManager : MonoBehaviour
         //Show results save confirmation window
         if (showSave)
         {
-            GUI.Box(smallWin, "Results saved at " + message);
-            if (GUI.Button(new Rect(smallWin.x + (smallWin.width / 2), smallWin.y + smallWin.height - 30, 70, 20), "Ok")) { showSave = false; }
+            GUI.Box(smallWin, "\n Results saved at \n" + message);
+            if (GUI.Button(new Rect(smallWin.x + (smallWin.width / 2) - (winRect.width / 12), smallWin.y + smallWin.height - winRect.height / 10 - 30, winRect.width / 6, winRect.height / 10), "Ok")) { showSave = false; }
         }
 
         if (showErr)
         {
             GUI.Box(smallWin, message);
-            if (GUI.Button(new Rect(smallWin.x + (smallWin.width / 2), smallWin.y + smallWin.height - 30, 70, 20), "Ok")) { showErr = false; }
+            if (GUI.Button(new Rect(smallWin.x + (smallWin.width / 2) - (winRect.width / 12), smallWin.y + smallWin.height - winRect.height / 10 - 30, winRect.width / 6, winRect.height / 10), "Ok")) { showErr = false; }
         }
     }
 }
